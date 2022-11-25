@@ -34,11 +34,20 @@
   if (placemark.thoroughfare) {
     place[@"street"] = placemark.thoroughfare;
   }
+  if (placemark.subThoroughfare) {
+    place[@"subThoroughfare"] = placemark.subThoroughfare;
+  }
   if (placemark.locality) {
     place[@"city"] = placemark.locality;
   }
+  if (placemark.subLocality) {
+    place[@"subLocality"] = placemark.subLocality;
+  }
   if (placemark.administrativeArea) {
     place[@"state"] = placemark.administrativeArea;
+  }
+  if (placemark.subAdministrativeArea) {
+    place[@"subAdministrativeArea"] = placemark.subAdministrativeArea;
   }
   if (placemark.country) {
     place[@"country"] = placemark.country;
