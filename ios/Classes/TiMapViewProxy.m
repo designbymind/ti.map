@@ -437,6 +437,15 @@
   }
 }
 
+- (void)removeAllGeoJSON:(id)unused
+{
+  TiThreadPerformOnMainThread(
+      ^{
+        [(TiMapView *)[self view] removeAllGeoJSON:unused];
+      },
+      NO);
+}
+
 - (void)addRoute:(id)arg
 {
   ENSURE_SINGLE_ARG(arg, TiMapRouteProxy);
