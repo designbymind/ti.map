@@ -40,11 +40,11 @@
 - (void)removeAnnotation:(id)args;
 - (void)removeAnnotations:(id)args;
 - (void)removeAllAnnotations:(id)args;
+- (void)removeAllGeoJSON:(id)unused;
 - (void)showAnnotations:(id)args;
 - (void)showAllAnnotations:(id)unused;
 - (void)selectAnnotation:(id)args;
 - (void)deselectAnnotation:(id)args;
-- (void)setLocation:(id)args;
 - (void)zoom:(id)args;
 - (void)addRoute:(id)args;
 - (void)removeRoute:(id)args;
