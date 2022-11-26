@@ -190,6 +190,18 @@ CLLocationCoordinate2D userNewLocation;
   return [(TiMapViewProxy *)[self proxy] annotationFromArg:arg];
 }
 
+- (NSArray *)annotationsFromGeoJSON:(id)value
+{
+  ENSURE_TYPE_OR_NIL(value, NSArray);
+  NSMutableArray *result = [NSMutableArray arrayWithCapacity:[value count]];
+  if (value != nil) {
+    for (id arg in value) {
+      [result addObject:[self annotationFromArg:arg]];
+    }
+  }
+  return result;
+}
+
 - (NSArray *)annotationsFromArgs:(id)value
 {
   ENSURE_TYPE_OR_NIL(value, NSArray);
@@ -308,7 +320,34 @@ CLLocationCoordinate2D userNewLocation;
 - (void)removeAllAnnotations:(id)args
 {
   ENSURE_UI_THREAD(removeAllAnnotations, args);
-  [self.map removeAnnotations:self.customAnnotations];
+
+  for (id<MKAnnotation> an in self.customAnnotations) {
+
+    if (![an isKindOfClass:[MKPointAnnotation class]] && ![an isKindOfClass:[MKPolyline class]] && ![an isKindOfClass:[MKPolygon class]]) {
+
+      if (![geoJSONProxies containsObject:an]) {
+        [self.map removeAnnotation:an];
+      }
+    }
+  }
+}
+
+- (void)removeAllGeoJSON:(id)args
+{
+  ENSURE_UI_THREAD(removeAllGeoJSON, args);
+
+  for (MKPointAnnotation *an in geoJSONProxies) {
+    [self.map removeAnnotation:an];
+    [geoJSONProxies removeObject:an];
+  }
+  for (MKPolyline *an in geoJSONProxies) {
+    [self.map removeAnnotation:an];
+    [geoJSONProxies removeObject:an];
+  }
+  for (MKPolygon *an in geoJSONProxies) {
+    [self.map removeAnnotation:an];
+    [geoJSONProxies removeObject:an];
+  }
 }
 
 - (void)setAnnotations_:(id)value
@@ -458,6 +497,66 @@ CLLocationCoordinate2D userNewLocation;
 }
 
 #pragma mark Public APIs
+
+- (void)setGeoJSON_:(id)args
+{
+  ENSURE_SINGLE_ARG(args, NSDictionary);
+
+  NSData *data;
+
+  if ([args objectForKey:@"jsonContent"]) {
+    NSDictionary *jsonData = [args objectForKey:@"jsonContent"];
+    NSError *error;
+
+    if (jsonData != nil) {
+      data = [NSJSONSerialization dataWithJSONObject:jsonData options:0 error:&error];
+    } else {
+      data = nil;
+    }
+  } else if ([args objectForKey:@"jsonFilePath"]) {
+    NSString *jsonPath = [TiUtils stringValue:[args objectForKey:@"jsonFilePath"]];
+
+    NSURL *url = [TiUtils toURL:jsonPath proxy:self.proxy];
+
+    data = [NSData dataWithContentsOfURL:url];
+  } else {
+    data = nil;
+  }
+
+  if (data != nil) {
+
+    NSDictionary *geoJSON = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    NSArray *shapes = [GeoJSONSerialization shapesFromGeoJSONFeatureCollection:geoJSON error:nil];
+
+    for (MKShape *shape in shapes) {
+      if ([shape isKindOfClass:[MKPointAnnotation class]]) {
+        [[self map] addAnnotation:shape];
+      } else if ([shape isKindOfClass:[MKPolygon class]]) {
+        MKOverlayRenderer *renderer = nil;
+        renderer = [[MKPolygonRenderer alloc] initWithPolygon:(MKPolygon *)shape];
+        ((MKPolygonRenderer *)renderer).strokeColor = [[TiUtils colorValue:[args objectForKey:@"strokeColorPolygon"]] color];
+        ((MKPolygonRenderer *)renderer).fillColor = [[TiUtils colorValue:[args objectForKey:@"fillColorPolygon"]] color];
+        ((MKPolygonRenderer *)renderer).lineWidth = [TiUtils floatValue:[args objectForKey:@"lineWidthPolygon"]];
+        renderer.alpha = [TiUtils floatValue:[args objectForKey:@"alphaValuePolygon"]];
+        CFDictionaryAddValue(mapObjects2View, shape, renderer);
+        [[self map] addOverlay:(id<MKOverlay>)shape];
+      } else if ([shape isKindOfClass:[MKPolyline class]]) {
+        MKOverlayRenderer *renderer = nil;
+        renderer = [[MKPolylineRenderer alloc] initWithPolyline:(MKPolyline *)shape];
+        ((MKPolylineRenderer *)renderer).strokeColor = [[TiUtils colorValue:[args objectForKey:@"strokeColorPolyLine"]] color];
+        ((MKPolylineRenderer *)renderer).lineWidth = [TiUtils floatValue:[args objectForKey:@"lineWidthPolyLine"]];
+        renderer.alpha = [TiUtils floatValue:[args objectForKey:@"alphaValuePolyLine"]];
+        CFDictionaryAddValue(mapObjects2View, shape, renderer);
+        [[self map] addOverlay:(id<MKOverlay>)shape];
+      }
+      [geoJSONProxies addObject:shape];
+
+      //            else if ([shape conformsToProtocol:@protocol(MKOverlay)]) {
+      //                [[self map] addOverlay:(id <MKOverlay>)shape];
+      //            }
+    }
+  }
+}
 
 - (void)setMapType_:(id)value
 {
