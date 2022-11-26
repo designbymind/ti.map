@@ -5,6 +5,7 @@
  * Please see the LICENSE included with this distribution for details.
  */
 
+#import "GeoJSONSerialization.h"
 #import "TiMKOverlayPathUniversal.h"
 #import "TiMapCameraProxy.h"
 #import "WildcardGestureRecognizer.h"
@@ -28,6 +29,7 @@
   BOOL ignoreRegionChanged;
   BOOL forceRender;
   MKCoordinateRegion region;
+  NSMutableArray *geoJSONProxies;
   NSMutableArray *polygonProxies;
   NSMutableArray *circleProxies;
   NSMutableArray *polylineProxies;
@@ -53,6 +55,7 @@
 
 - (TiMapAnnotationProxy *)annotationFromArg:(id)arg;
 - (NSArray *)annotationsFromArgs:(id)value;
+- (NSArray *)annotationsFromGeoJSON:(id)value;
 - (MKMapView *)map;
 - (TiMapCameraProxy *)camera;
 
