@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -35,6 +35,12 @@
 		27A609EA19F5927000CA150A /* WildcardGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 27A609E919F5927000CA150A /* WildcardGestureRecognizer.m */; };
 		27A609EC19F5B84000CA150A /* TiMapCircleProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 27A609EB19F5B84000CA150A /* TiMapCircleProxy.m */; };
 		27A609F019F711B700CA150A /* TiMapPolylineProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 27A609EF19F711B700CA150A /* TiMapPolylineProxy.m */; };
+		2C18A322284EF9EE0083EA45 /* GeoJSONSerialization.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C18A320284EF9EE0083EA45 /* GeoJSONSerialization.h */; };
+		2C18A323284EF9EE0083EA45 /* GeoJSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C18A321284EF9EE0083EA45 /* GeoJSONSerialization.m */; };
+		4B59BF9F2B9ED6EB009FB721 /* TiCutoutCircle.h in Headers */ = {isa = PBXBuildFile; fileRef = 4B59BF9E2B9ED6EB009FB721 /* TiCutoutCircle.h */; };
+		4B59BFA12B9ED6FD009FB721 /* TiCutoutCircle.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B59BFA02B9ED6FD009FB721 /* TiCutoutCircle.m */; };
+		4B7FAD592A9B4EA800660499 /* TiMapFeatureAnnotationProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 4B7FAD572A9B4EA800660499 /* TiMapFeatureAnnotationProxy.h */; };
+		4B7FAD5A2A9B4EA800660499 /* TiMapFeatureAnnotationProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B7FAD582A9B4EA800660499 /* TiMapFeatureAnnotationProxy.m */; };
 		815136F31D355BF5009E3E2C /* TiMapSnapshotterProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 815136F11D355BF5009E3E2C /* TiMapSnapshotterProxy.h */; };
 		815136F41D355BF5009E3E2C /* TiMapSnapshotterProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 815136F21D355BF5009E3E2C /* TiMapSnapshotterProxy.m */; };
 		AA747D9F0F9514B9006C5449 /* TiMap_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* TiMap_Prefix.pch */; };
@@ -50,6 +56,20 @@
 		CED651C917D7AA21007C2954 /* TiMapCustomAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = CED651BD17D7AA21007C2954 /* TiMapCustomAnnotationView.m */; };
 		CED651CA17D7AA21007C2954 /* TiMapImageAnnotationView.h in Headers */ = {isa = PBXBuildFile; fileRef = CED651BE17D7AA21007C2954 /* TiMapImageAnnotationView.h */; };
 		CED651CB17D7AA21007C2954 /* TiMapImageAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = CED651BF17D7AA21007C2954 /* TiMapImageAnnotationView.m */; };
+		F7A470010000000000000001 /* TiMapFeaturedAnnotationView.h in Headers */ = {isa = PBXBuildFile; fileRef = F7A470030000000000000003 /* TiMapFeaturedAnnotationView.h */; };
+		F7A470020000000000000002 /* TiMapFeaturedAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A470040000000000000004 /* TiMapFeaturedAnnotationView.m */; };
+		F7A480010000000000000001 /* TiMapUserLocationAnnotationView.h in Headers */ = {isa = PBXBuildFile; fileRef = F7A480030000000000000003 /* TiMapUserLocationAnnotationView.h */; };
+		F7A480020000000000000002 /* TiMapUserLocationAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A480040000000000000004 /* TiMapUserLocationAnnotationView.m */; };
+		F7A490010000000000000001 /* TiMapLookAroundUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = F7A490110000000000000011 /* TiMapLookAroundUtils.h */; };
+		F7A490020000000000000002 /* TiMapLookAroundUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A490120000000000000012 /* TiMapLookAroundUtils.m */; };
+		F7A490030000000000000003 /* TiMapLookAroundView.h in Headers */ = {isa = PBXBuildFile; fileRef = F7A490130000000000000013 /* TiMapLookAroundView.h */; };
+		F7A490040000000000000004 /* TiMapLookAroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A490140000000000000014 /* TiMapLookAroundView.m */; };
+		F7A490050000000000000005 /* TiMapLookAroundViewProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = F7A490150000000000000015 /* TiMapLookAroundViewProxy.h */; };
+		F7A490060000000000000006 /* TiMapLookAroundViewProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A490160000000000000016 /* TiMapLookAroundViewProxy.m */; };
+		F7A500010000000000000001 /* TiMapZoomControl.h in Headers */ = {isa = PBXBuildFile; fileRef = F7A500110000000000000011 /* TiMapZoomControl.h */; };
+		F7A500020000000000000002 /* TiMapZoomControl.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A500120000000000000012 /* TiMapZoomControl.m */; };
+		F7A500030000000000000003 /* TiMapZoomControlProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = F7A500130000000000000013 /* TiMapZoomControlProxy.h */; };
+		F7A500040000000000000004 /* TiMapZoomControlProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A500140000000000000014 /* TiMapZoomControlProxy.m */; };
 		CED651CC17D7AA21007C2954 /* TiMapPinAnnotationView.h in Headers */ = {isa = PBXBuildFile; fileRef = CED651C017D7AA21007C2954 /* TiMapPinAnnotationView.h */; };
 		CED651CD17D7AA21007C2954 /* TiMapPinAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = CED651C117D7AA21007C2954 /* TiMapPinAnnotationView.m */; };
 		CED651CE17D7AA21007C2954 /* TiMapView.h in Headers */ = {isa = PBXBuildFile; fileRef = CED651C217D7AA21007C2954 /* TiMapView.h */; };
@@ -94,6 +114,12 @@
 		27A609ED19F5B85900CA150A /* TiMapCircleProxy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TiMapCircleProxy.h; path = Classes/TiMapCircleProxy.h; sourceTree = "<group>"; };
 		27A609EE19F7112C00CA150A /* TiMapPolylineProxy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TiMapPolylineProxy.h; path = Classes/TiMapPolylineProxy.h; sourceTree = "<group>"; };
 		27A609EF19F711B700CA150A /* TiMapPolylineProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapPolylineProxy.m; path = Classes/TiMapPolylineProxy.m; sourceTree = "<group>"; };
+		2C18A320284EF9EE0083EA45 /* GeoJSONSerialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GeoJSONSerialization.h; path = Classes/GeoJSONSerialization.h; sourceTree = "<group>"; };
+		2C18A321284EF9EE0083EA45 /* GeoJSONSerialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GeoJSONSerialization.m; path = Classes/GeoJSONSerialization.m; sourceTree = "<group>"; };
+		4B59BF9E2B9ED6EB009FB721 /* TiCutoutCircle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiCutoutCircle.h; path = Classes/TiCutoutCircle.h; sourceTree = "<group>"; };
+		4B59BFA02B9ED6FD009FB721 /* TiCutoutCircle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiCutoutCircle.m; path = Classes/TiCutoutCircle.m; sourceTree = "<group>"; };
+		4B7FAD572A9B4EA800660499 /* TiMapFeatureAnnotationProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapFeatureAnnotationProxy.h; path = Classes/TiMapFeatureAnnotationProxy.h; sourceTree = "<group>"; };
+		4B7FAD582A9B4EA800660499 /* TiMapFeatureAnnotationProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapFeatureAnnotationProxy.m; path = Classes/TiMapFeatureAnnotationProxy.m; sourceTree = "<group>"; };
 		815136F11D355BF5009E3E2C /* TiMapSnapshotterProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapSnapshotterProxy.h; path = Classes/TiMapSnapshotterProxy.h; sourceTree = "<group>"; };
 		815136F21D355BF5009E3E2C /* TiMapSnapshotterProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapSnapshotterProxy.m; path = Classes/TiMapSnapshotterProxy.m; sourceTree = "<group>"; };
 		AA747D9E0F9514B9006C5449 /* TiMap_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TiMap_Prefix.pch; sourceTree = SOURCE_ROOT; };
@@ -109,6 +135,20 @@
 		CED651BD17D7AA21007C2954 /* TiMapCustomAnnotationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapCustomAnnotationView.m; path = Classes/TiMapCustomAnnotationView.m; sourceTree = "<group>"; };
 		CED651BE17D7AA21007C2954 /* TiMapImageAnnotationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapImageAnnotationView.h; path = Classes/TiMapImageAnnotationView.h; sourceTree = "<group>"; };
 		CED651BF17D7AA21007C2954 /* TiMapImageAnnotationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapImageAnnotationView.m; path = Classes/TiMapImageAnnotationView.m; sourceTree = "<group>"; };
+		F7A470030000000000000003 /* TiMapFeaturedAnnotationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapFeaturedAnnotationView.h; path = Classes/TiMapFeaturedAnnotationView.h; sourceTree = "<group>"; };
+		F7A470040000000000000004 /* TiMapFeaturedAnnotationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapFeaturedAnnotationView.m; path = Classes/TiMapFeaturedAnnotationView.m; sourceTree = "<group>"; };
+		F7A480030000000000000003 /* TiMapUserLocationAnnotationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapUserLocationAnnotationView.h; path = Classes/TiMapUserLocationAnnotationView.h; sourceTree = "<group>"; };
+		F7A480040000000000000004 /* TiMapUserLocationAnnotationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapUserLocationAnnotationView.m; path = Classes/TiMapUserLocationAnnotationView.m; sourceTree = "<group>"; };
+		F7A490110000000000000011 /* TiMapLookAroundUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapLookAroundUtils.h; path = Classes/TiMapLookAroundUtils.h; sourceTree = "<group>"; };
+		F7A490120000000000000012 /* TiMapLookAroundUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapLookAroundUtils.m; path = Classes/TiMapLookAroundUtils.m; sourceTree = "<group>"; };
+		F7A490130000000000000013 /* TiMapLookAroundView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapLookAroundView.h; path = Classes/TiMapLookAroundView.h; sourceTree = "<group>"; };
+		F7A490140000000000000014 /* TiMapLookAroundView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapLookAroundView.m; path = Classes/TiMapLookAroundView.m; sourceTree = "<group>"; };
+		F7A490150000000000000015 /* TiMapLookAroundViewProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapLookAroundViewProxy.h; path = Classes/TiMapLookAroundViewProxy.h; sourceTree = "<group>"; };
+		F7A490160000000000000016 /* TiMapLookAroundViewProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapLookAroundViewProxy.m; path = Classes/TiMapLookAroundViewProxy.m; sourceTree = "<group>"; };
+		F7A500110000000000000011 /* TiMapZoomControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapZoomControl.h; path = Classes/TiMapZoomControl.h; sourceTree = "<group>"; };
+		F7A500120000000000000012 /* TiMapZoomControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapZoomControl.m; path = Classes/TiMapZoomControl.m; sourceTree = "<group>"; };
+		F7A500130000000000000013 /* TiMapZoomControlProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapZoomControlProxy.h; path = Classes/TiMapZoomControlProxy.h; sourceTree = "<group>"; };
+		F7A500140000000000000014 /* TiMapZoomControlProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapZoomControlProxy.m; path = Classes/TiMapZoomControlProxy.m; sourceTree = "<group>"; };
 		CED651C017D7AA21007C2954 /* TiMapPinAnnotationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapPinAnnotationView.h; path = Classes/TiMapPinAnnotationView.h; sourceTree = "<group>"; };
 		CED651C117D7AA21007C2954 /* TiMapPinAnnotationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiMapPinAnnotationView.m; path = Classes/TiMapPinAnnotationView.m; sourceTree = "<group>"; };
 		CED651C217D7AA21007C2954 /* TiMapView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiMapView.h; path = Classes/TiMapView.h; sourceTree = "<group>"; };
@@ -172,6 +212,8 @@
 				DB07496C1E081A59009D8A71 /* Annotation */,
 				DB07496F1E081A8A009D8A71 /* Camera */,
 				DB3657001E50C4C40040E0B9 /* Extensions */,
+				F7A490200000000000000020 /* LookAround */,
+				F7A500200000000000000020 /* ZoomControl */,
 				DB0749711E081A97009D8A71 /* MapView */,
 				DB07496E1E081A79009D8A71 /* Overlays */,
 				DB0749701E081A8F009D8A71 /* Route */,
@@ -179,6 +221,8 @@
 				DB3656EF1E50BA740040E0B9 /* TiMapConstants.h */,
 				24DD6CF71134B3F500162E58 /* TiMapModule.h */,
 				24DD6CF81134B3F500162E58 /* TiMapModule.m */,
+				CEE33CF119EC4C150005E745 /* TiMapUtils.h */,
+				CEE33CF219EC4C150005E745 /* TiMapUtils.m */,
 				24DE9E0F11C5FE74003F90F6 /* TiMapModuleAssets.h */,
 				24DE9E1011C5FE74003F90F6 /* TiMapModuleAssets.m */,
 			);
@@ -226,12 +270,18 @@
 		DB07496C1E081A59009D8A71 /* Annotation */ = {
 			isa = PBXGroup;
 			children = (
+				4B7FAD572A9B4EA800660499 /* TiMapFeatureAnnotationProxy.h */,
+				4B7FAD582A9B4EA800660499 /* TiMapFeatureAnnotationProxy.m */,
 				CED651BA17D7AA21007C2954 /* TiMapAnnotationProxy.h */,
 				CED651BB17D7AA21007C2954 /* TiMapAnnotationProxy.m */,
 				CED651BC17D7AA21007C2954 /* TiMapCustomAnnotationView.h */,
 				CED651BD17D7AA21007C2954 /* TiMapCustomAnnotationView.m */,
 				CED651BE17D7AA21007C2954 /* TiMapImageAnnotationView.h */,
 				CED651BF17D7AA21007C2954 /* TiMapImageAnnotationView.m */,
+				F7A470030000000000000003 /* TiMapFeaturedAnnotationView.h */,
+				F7A470040000000000000004 /* TiMapFeaturedAnnotationView.m */,
+				F7A480030000000000000003 /* TiMapUserLocationAnnotationView.h */,
+				F7A480040000000000000004 /* TiMapUserLocationAnnotationView.m */,
 				CED651C017D7AA21007C2954 /* TiMapPinAnnotationView.h */,
 				CED651C117D7AA21007C2954 /* TiMapPinAnnotationView.m */,
 				DB0CC9FF2010840900597F24 /* TiMapMarkerAnnotationView.h */,
@@ -243,6 +293,8 @@
 		DB07496D1E081A6A009D8A71 /* Circle */ = {
 			isa = PBXGroup;
 			children = (
+				4B59BFA02B9ED6FD009FB721 /* TiCutoutCircle.m */,
+				4B59BF9E2B9ED6EB009FB721 /* TiCutoutCircle.h */,
 				27A609EB19F5B84000CA150A /* TiMapCircleProxy.m */,
 				27A609ED19F5B85900CA150A /* TiMapCircleProxy.h */,
 			);
@@ -270,6 +322,30 @@
 			name = Camera;
 			sourceTree = "<group>";
 		};
+		F7A490200000000000000020 /* LookAround */ = {
+			isa = PBXGroup;
+			children = (
+				F7A490110000000000000011 /* TiMapLookAroundUtils.h */,
+				F7A490120000000000000012 /* TiMapLookAroundUtils.m */,
+				F7A490130000000000000013 /* TiMapLookAroundView.h */,
+				F7A490140000000000000014 /* TiMapLookAroundView.m */,
+				F7A490150000000000000015 /* TiMapLookAroundViewProxy.h */,
+				F7A490160000000000000016 /* TiMapLookAroundViewProxy.m */,
+			);
+			name = LookAround;
+			sourceTree = "<group>";
+		};
+		F7A500200000000000000020 /* ZoomControl */ = {
+			isa = PBXGroup;
+			children = (
+				F7A500110000000000000011 /* TiMapZoomControl.h */,
+				F7A500120000000000000012 /* TiMapZoomControl.m */,
+				F7A500130000000000000013 /* TiMapZoomControlProxy.h */,
+				F7A500140000000000000014 /* TiMapZoomControlProxy.m */,
+			);
+			name = ZoomControl;
+			sourceTree = "<group>";
+		};
 		DB0749701E081A8F009D8A71 /* Route */ = {
 			isa = PBXGroup;
 			children = (
@@ -287,8 +363,6 @@
 				CED651C317D7AA21007C2954 /* TiMapView.m */,
 				CED651C417D7AA21007C2954 /* TiMapViewProxy.h */,
 				CED651C517D7AA21007C2954 /* TiMapViewProxy.m */,
-				CEE33CF119EC4C150005E745 /* TiMapUtils.h */,
-				CEE33CF219EC4C150005E745 /* TiMapUtils.m */,
 				27A609E819F5922B00CA150A /* WildcardGestureRecognizer.h */,
 				27A609E919F5927000CA150A /* WildcardGestureRecognizer.m */,
 			);
@@ -316,6 +390,8 @@
 		DB3657001E50C4C40040E0B9 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				2C18A320284EF9EE0083EA45 /* GeoJSONSerialization.h */,
+				2C18A321284EF9EE0083EA45 /* GeoJSONSerialization.m */,
 				DB3656FC1E50C4C10040E0B9 /* UIColor+AndroidHueParity.h */,
 				DB3656FD1E50C4C10040E0B9 /* UIColor+AndroidHueParity.m */,
 			);
@@ -332,8 +408,10 @@
 				194D001C2047DB4A002150BD /* TiMapImageOverlayProxy.h in Headers */,
 				AA747D9F0F9514B9006C5449 /* TiMap_Prefix.pch in Headers */,
 				CE92EC2217DF8B020082E943 /* TiMKOverlayPathUniversal.h in Headers */,
+				4B7FAD592A9B4EA800660499 /* TiMapFeatureAnnotationProxy.h in Headers */,
 				24DD6CF91134B3F500162E58 /* TiMapModule.h in Headers */,
 				24DE9E1111C5FE74003F90F6 /* TiMapModuleAssets.h in Headers */,
+				2C18A322284EF9EE0083EA45 /* GeoJSONSerialization.h in Headers */,
 				DB3656FE1E50C4C10040E0B9 /* UIColor+AndroidHueParity.h in Headers */,
 				CED651C617D7AA21007C2954 /* TiMapAnnotationProxy.h in Headers */,
 				CE92EC2517DF9A640082E943 /* TiMapCameraProxy.h in Headers */,
@@ -343,9 +421,17 @@
 				CED651C817D7AA21007C2954 /* TiMapCustomAnnotationView.h in Headers */,
 				DB0CCA012010840900597F24 /* TiMapMarkerAnnotationView.h in Headers */,
 				CED651CA17D7AA21007C2954 /* TiMapImageAnnotationView.h in Headers */,
+				F7A470010000000000000001 /* TiMapFeaturedAnnotationView.h in Headers */,
+				F7A480010000000000000001 /* TiMapUserLocationAnnotationView.h in Headers */,
+				F7A490010000000000000001 /* TiMapLookAroundUtils.h in Headers */,
+				F7A490030000000000000003 /* TiMapLookAroundView.h in Headers */,
+				F7A490050000000000000005 /* TiMapLookAroundViewProxy.h in Headers */,
+				F7A500010000000000000001 /* TiMapZoomControl.h in Headers */,
+				F7A500030000000000000003 /* TiMapZoomControlProxy.h in Headers */,
 				CED651CC17D7AA21007C2954 /* TiMapPinAnnotationView.h in Headers */,
 				CED651CE17D7AA21007C2954 /* TiMapView.h in Headers */,
 				194D00202047DDED002150BD /* TiMapImageOverlayRenderer.h in Headers */,
+				4B59BF9F2B9ED6EB009FB721 /* TiCutoutCircle.h in Headers */,
 				CED651D017D7AA21007C2954 /* TiMapViewProxy.h in Headers */,
 				DB0CCA062010843000597F24 /* TiMapOverlayPattern.h in Headers */,
 				27A609E619F54FC300CA150A /* TiMapPolygonProxy.h in Headers */,
@@ -378,7 +464,8 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1250;
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2700;
 			};
 			buildConfigurationList = 1DEB922208733DC00010E9CD /* Build configuration list for PBXProject "map" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -428,6 +515,7 @@
 				194D001D2047DB4A002150BD /* TiMapImageOverlayProxy.m in Sources */,
 				27A609F019F711B700CA150A /* TiMapPolylineProxy.m in Sources */,
 				24DE9E1211C5FE74003F90F6 /* TiMapModuleAssets.m in Sources */,
+				2C18A323284EF9EE0083EA45 /* GeoJSONSerialization.m in Sources */,
 				CED651C717D7AA21007C2954 /* TiMapAnnotationProxy.m in Sources */,
 				DB3656FF1E50C4C10040E0B9 /* UIColor+AndroidHueParity.m in Sources */,
 				CED651C917D7AA21007C2954 /* TiMapCustomAnnotationView.m in Sources */,
@@ -436,13 +524,22 @@
 				DB0CCA002010840900597F24 /* TiMapMarkerAnnotationView.m in Sources */,
 				27A609E719F54FC300CA150A /* TiMapPolygonProxy.m in Sources */,
 				CE92EC2617DF9A640082E943 /* TiMapCameraProxy.m in Sources */,
+				4B59BFA12B9ED6FD009FB721 /* TiCutoutCircle.m in Sources */,
 				27A609EA19F5927000CA150A /* WildcardGestureRecognizer.m in Sources */,
 				815136F41D355BF5009E3E2C /* TiMapSnapshotterProxy.m in Sources */,
 				CED651CB17D7AA21007C2954 /* TiMapImageAnnotationView.m in Sources */,
+				F7A470020000000000000002 /* TiMapFeaturedAnnotationView.m in Sources */,
+				F7A480020000000000000002 /* TiMapUserLocationAnnotationView.m in Sources */,
+				F7A490020000000000000002 /* TiMapLookAroundUtils.m in Sources */,
+				F7A490040000000000000004 /* TiMapLookAroundView.m in Sources */,
+				F7A490060000000000000006 /* TiMapLookAroundViewProxy.m in Sources */,
+				F7A500020000000000000002 /* TiMapZoomControl.m in Sources */,
+				F7A500040000000000000004 /* TiMapZoomControlProxy.m in Sources */,
 				CED651CD17D7AA21007C2954 /* TiMapPinAnnotationView.m in Sources */,
 				27A609EC19F5B84000CA150A /* TiMapCircleProxy.m in Sources */,
 				CEE33CF419EC4C150005E745 /* TiMapUtils.m in Sources */,
 				CED651CF17D7AA21007C2954 /* TiMapView.m in Sources */,
+				4B7FAD5A2A9B4EA800660499 /* TiMapFeatureAnnotationProxy.m in Sources */,
 				CED651D117D7AA21007C2954 /* TiMapViewProxy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -483,6 +580,7 @@
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = NO;
 				INSTALL_PATH = /usr/local/lib;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = (
 					"-DDEBUG",
@@ -522,7 +620,7 @@
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = NO;
 				INSTALL_PATH = /usr/local/lib;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "-DTI_POST_1_2";
 				OTHER_LDFLAGS = "-ObjC";
@@ -563,6 +661,7 @@
 				ENABLE_BITCODE = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -583,7 +682,7 @@
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = NO;
 				INSTALL_PATH = /usr/local/lib;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"-DDEBUG",
@@ -595,6 +694,7 @@
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				RUN_CLANG_STATIC_ANALYZER = NO;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -627,6 +727,7 @@
 				DSTROOT = /tmp/TiMap.dst;
 				ENABLE_BITCODE = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_MODEL_TUNING = G5;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -647,12 +748,13 @@
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = NO;
 				INSTALL_PATH = /usr/local/lib;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				OTHER_CFLAGS = "-DTI_POST_1_2";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = TiMap;
 				RUN_CLANG_STATIC_ANALYZER = NO;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;

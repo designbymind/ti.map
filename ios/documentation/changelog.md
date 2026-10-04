@@ -1,5 +1,42 @@
 # Change Log
 
+## 7.5.0
+
+- Added opt-in resolved local search with Place IDs, alternate IDs, full addresses, and coordinates for each result.
+- Added request-scoped callbacks, cancellation, and stale-response protection without changing autocomplete behavior.
+- Guarded completion-result Place IDs at iOS 18 and included alternate identifiers and full postal address details.
+- Added an interactive resolved-search example and documented the search/cancellation API.
+
+## 7.4.14
+
+- Added native title and subtitle labels to featured marker annotations without changing the compact or selected balloon geometry.
+- Added featured-marker support for `markerTitleVisibility` and `markerSubtitleVisibility`, including adaptive subtitle visibility during selection.
+- Preserved the geographic coordinate anchor while rendering labels outside the annotation's compact layout and collision bounds.
+- Added runtime refresh support for featured-marker title and subtitle changes.
+- Styled featured-marker title and subtitle labels with bold native fonts and removed the outlined-text treatment.
+- Added theme-aware label colors and soft drop shadows: dark text with a light shadow in light mode, and light text with a dark shadow in dark mode.
+- Restored compact annotation bounds and restricted hit testing to the compact circle or selected balloon and anchor dot, excluding labels and empty layout space from MapKit's selectable range.
+
+## 7.4.13
+
+- Zoom-control drags now start at the current map camera distance without jumping to the touched position. `zoomRange` sets the levels across the track; `relativeZoomEnabled: false` restores absolute positioning.
+- Added a configurable horizontal bar handle with spring expansion, contraction on release, and delayed fade. `thumbStyle: 'circle'` restores the original shape.
+- Added `activationDelay` to require a short stationary hold and `hitWidth` to restrict touch interception to a narrow strip beside the track.
+- Anchored `activationDelay` to the hardware touch timestamp so UIKit delivery latency on physical devices does not extend the configured hold.
+- Prevented the relative thumb position from flashing at its absolute camera-progress position after an invisible-idle control is released.
+- Kept finger position independent of camera-distance synchronization during a drag and added cleanup when the control leaves its window.
+
+## 7.4.12
+
+- Documented `Map.View.selectableMapFeatures` as runtime-updatable for changing interactive Apple Maps feature types.
+- Fixed selectable-feature option-mask initialization when configuring the map during creation.
+
+## 7.4.11
+
+- Added `Map.createZoomControl()` for an invisible-when-idle, always-touchable native vertical zoom control.
+- Added accumulated `Map.View.zoomBy()` and absolute `Map.View.zoomTo()` camera-distance APIs.
+- Added `cameraDistance` and native zoom lifecycle events.
+
 ⚠️ Important note: This changelog has been replaced by the official Github [releases tab](https://github.com/appcelerator-modules/ti.map/releases). 
 
 ```

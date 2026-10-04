@@ -182,7 +182,7 @@
   id current = [self valueForUndefinedKey:@"title"];
   [self replaceValue:title forKey:@"title" notification:NO];
   if (![title isEqualToString:current]) {
-    [self setNeedsRefreshingWithSelection:NO];
+    [self setNeedsRefreshingWithSelection:[TiUtils boolValue:[self valueForUndefinedKey:@"showAsFeaturedMarker"] def:NO]];
   }
 }
 
@@ -203,7 +203,7 @@
   [self replaceValue:subtitle forKey:@"subtitle" notification:NO];
 
   if (![subtitle isEqualToString:current]) {
-    [self setNeedsRefreshingWithSelection:NO];
+    [self setNeedsRefreshingWithSelection:[TiUtils boolValue:[self valueForUndefinedKey:@"showAsFeaturedMarker"] def:NO]];
   }
 }
 
@@ -348,6 +348,35 @@
   id current = [self valueForUndefinedKey:@"showAsMarker"];
   [self replaceValue:marker forKey:@"showAsMarker" notification:NO];
   if ([current isEqual:marker] == NO) {
+    [self setNeedsRefreshingWithSelection:YES];
+  }
+}
+
+- (void)setShowAsFeaturedMarker:(id)featuredMarker
+{
+  id current = [self valueForUndefinedKey:@"showAsFeaturedMarker"];
+  [self replaceValue:featuredMarker forKey:@"showAsFeaturedMarker" notification:NO];
+  if ([current isEqual:featuredMarker] == NO) {
+    [self setNeedsRefreshingWithSelection:YES];
+  }
+}
+
+- (void)setFeaturedMarkerShadow:(id)shadow
+{
+  ENSURE_TYPE_OR_NIL(shadow, NSDictionary);
+  id current = [self valueForUndefinedKey:@"featuredMarkerShadow"];
+  [self replaceValue:shadow forKey:@"featuredMarkerShadow" notification:NO];
+  if (![current isEqual:shadow]) {
+    [self setNeedsRefreshingWithSelection:YES];
+  }
+}
+
+- (void)setFeaturedMarkerSelectedShadow:(id)shadow
+{
+  ENSURE_TYPE_OR_NIL(shadow, NSDictionary);
+  id current = [self valueForUndefinedKey:@"featuredMarkerSelectedShadow"];
+  [self replaceValue:shadow forKey:@"featuredMarkerSelectedShadow" notification:NO];
+  if (![current isEqual:shadow]) {
     [self setNeedsRefreshingWithSelection:YES];
   }
 }

@@ -125,6 +125,14 @@ describe('ti.map', () => {
 	});
 
 	describe('methods', () => {
+		if (IOS) {
+			describe('#search()', () => {
+				it('is a Function', () => {
+					expect(Map.search).toEqual(jasmine.any(Function));
+				});
+			});
+		}
+
 		if (ANDROID) {
 			describe('#isGooglePlayServicesAvailable()', () => {
 				it('is a Function', () => {

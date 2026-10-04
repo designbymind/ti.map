@@ -1,6 +1,16 @@
-# Titanium Map Module [![Build Status](https://jenkins.appcelerator.org/buildStatus/icon?job=modules%2Fti.map%2Fmaster)](https://jenkins.appcelerator.org/job/modules/job/ti.map/job/master/) [![@titanium-sdk/ti.map](https://img.shields.io/npm/v/@titanium-sdk/ti.map.png)](https://www.npmjs.com/package/@titanium-sdk/ti.map)
+# Ti.Map — DesignByMind fork
 
-This is the Map Module for Titanium. Please use [JIRA](http://jira.appcelerator.org) to report issues or ask our [TiSlack community](http://tislack.org) for help! :rocket:
+This repository is the source of truth for the DesignByMind fork of Ti.Map, a general-purpose
+map module for Titanium applications.
+The iOS module is version **7.5.0** and builds with Titanium SDK **13.4.1.GA** (minimum 13.3.0).
+
+The fork preserves native featured markers, user-location styling, GeoJSON and cutout overlays,
+Look Around previews and utilities, map zoom controls, selectable map features, and resolved
+local search with Apple Place IDs where available. See [API documentation](apidoc),
+[iOS examples](ios/example), and the [iOS changelog](ios/documentation/changelog.md).
+
+Compatible changes from [TiDev Ti.Map](https://github.com/tidev/ti.map) are merged with Git history
+preserved. Report fork-specific issues [here](https://github.com/designbymind/ti.map/issues).
 
 ## Contributors
 
@@ -9,5 +19,5 @@ This is the Map Module for Titanium. Please use [JIRA](http://jira.appcelerator.
 
 ## Legal
 
-This module is Copyright (c) 2010-present by Axway Appcelerator, Inc. All Rights Reserved. Usage of this module is subject to 
-the Terms of Service agreement with Appcelerator, Inc.  
+This module is Copyright (c) 2010-present by Axway Appcelerator, Inc. All Rights Reserved. Usage of this module is subject to
+the Terms of Service agreement with Appcelerator, Inc.

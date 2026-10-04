@@ -1,0 +1,232 @@
+---
+name: Modules.Map.ZoomControl
+summary: A native vertical touch surface for smooth, display-synchronized map zooming.
+description: |
+    Starting in 7.4.13, each drag begins at the map's current camera distance, wherever the user
+    first touches. Moving up zooms in and moving down zooms out. `zoomRange` controls the total
+    number of zoom levels across the track; one level halves or doubles camera distance. With
+    a range of 10, starting halfway down allows 5 levels in each direction; starting at the
+    bottom allows only zooming in, up to 10 levels. Configured camera-distance limits still apply.
+    Each new drag captures a fresh camera distance and touch origin.
+
+    Set `relativeZoomEnabled: false` to restore absolute touch positioning from 7.4.11, where
+    the top represents `minimumDistance` and the bottom represents `maximumDistance`.
+    Programmatic `setProgress()` and the read-only `progress` property always use this absolute
+    logarithmic distance range, independently of where a drag starts.
+
+    The default bar handle expands with a spring when touched, follows the finger vertically,
+    contracts on release, then fades after `idleDelay`. Its Titanium view
+    remains hit-testable when `trackOpacity` and `thumbOpacity` are zero, allowing an invisible idle
+    control that appears only during interaction. Keep the control's own `opacity` above zero
+    and `touchEnabled` true. Use a width of at least 114 points for the default 110-point bar.
+    Animations respect the system Reduce Motion setting.
+
+    `hitWidth` can limit touch interception to a narrow strip while leaving the view wide enough
+    to draw the expanded handle. `activationDelay` can require a short stationary hold before the
+    control activates. Moving more than 10 points before that delay expires cancels the pending
+    zoom. A touch that begins within the hit strip belongs to this control and cannot be replayed
+    to a view underneath after cancellation.
+extends: Titanium.UI.View
+platforms: [iphone, ipad]
+since: "7.4.11"
+
+properties:
+  - name: mapView
+    summary: Map view controlled by this zoom control.
+    type: Modules.Map.View
+  - name: minimumDistance
+    summary: Closest camera distance in meters.
+    type: Number
+    default: 40
+  - name: maximumDistance
+    summary: Farthest camera distance in meters.
+    type: Number
+    default: 40000000
+  - name: relativeZoomEnabled
+    summary: Anchors each drag to the map's current camera distance without jumping on touch-down.
+    description: |
+        Applies to the next drag. If the current camera distance is already outside this control's
+        configured limits, that drag includes its initial distance to avoid snapping on activation.
+        MapKit's own camera zoom range remains authoritative.
+    type: Boolean
+    default: true
+    since: "7.4.13"
+  - name: zoomRange
+    summary: Total relative zoom levels across the usable track, from 0.1 through 30.
+    description: Applies to the next drag when `relativeZoomEnabled` is true.
+    type: Number
+    default: 10
+    since: "7.4.13"
+  - name: activationDelay
+    summary: Stationary hold duration in milliseconds before a touch activates zooming.
+    description: |
+        A value of zero activates immediately. If the finger moves more than 10 points before the
+        delay expires, activation is cancelled. `zoomstart` and the active appearance begin only
+        after successful activation. The delay is measured from the native hardware touch timestamp,
+        so UIKit touch-delivery latency does not extend the configured duration on physical devices.
+    type: Number
+    default: 0
+    since: "7.4.13"
+  - name: hitWidth
+    summary: Width in points of the horizontal strip that can begin a zoom gesture.
+    description: |
+        For the default bar style, the strip is measured inward from the control's right edge,
+        beside the track. For the circle style, it is centered on the track. The control's full
+        view width remains available to draw the expanded thumb. A value of zero uses the complete
+        control width.
+    type: Number
+    default: 0
+    since: "7.4.13"
+  - name: thumbStyle
+    summary: Handle style, either `bar` or the original `circle`.
+    type: String
+    default: bar
+    since: "7.4.13"
+  - name: thumbWidth
+    summary: Expanded bar width in points, constrained to the control's width minus its track inset.
+    type: Number
+    default: 110
+    since: "7.4.13"
+  - name: thumbCornerRadius
+    summary: Bar corner radius in points; the circle style remains round.
+    type: Number
+    default: 4
+    since: "7.4.13"
+  - name: animationDuration
+    summary: Duration in milliseconds for handle expansion, contraction, and the subsequent idle fade.
+    type: Number
+    default: 220
+    since: "7.4.13"
+  - name: trackColor
+    summary: Color of the zoom-control track.
+    type: String
+    default: white
+  - name: thumbColor
+    summary: Color of the zoom-control handle.
+    type: String
+    default: white
+  - name: trackWidth
+    summary: Width of the visible track in points; it does not change the touchable width.
+    type: Number
+    default: 2
+  - name: thumbSize
+    summary: Bar height and collapsed width, or circle diameter, in points.
+    type: Number
+    default: 30
+  - name: trackOpacity
+    summary: Track opacity while idle. Set to zero for an invisible but touchable track.
+    type: Number
+    default: 0
+  - name: activeTrackOpacity
+    summary: Track opacity during touch interaction.
+    type: Number
+    default: 0.45
+  - name: thumbOpacity
+    summary: Thumb opacity while idle.
+    type: Number
+    default: 0
+  - name: activeThumbOpacity
+    summary: Handle opacity during touch interaction.
+    type: Number
+    default: 1
+  - name: idleDelay
+    summary: Delay in milliseconds before returning to idle opacity after touch ends.
+    type: Number
+    default: 500
+  - name: hapticsEnabled
+    summary: Whether selection haptics are enabled during zoom interaction.
+    type: Boolean
+    default: true
+  - name: hapticInterval
+    summary: Progress interval from 0.01 through 1.0 between selection haptics.
+    type: Number
+    default: 0.1
+  - name: levelIndicators
+    summary: Optional emoji or text displayed in the thumb for the closest configured progress value.
+    description: Uses absolute camera-distance progress, so the indicator reflects map zoom rather than finger position.
+    type: Array<ZoomLevelIndicator>
+  - name: progress
+    summary: Current logarithmic zoom progress, from 0 at maximum distance to 1 at minimum distance.
+    type: Number
+    permission: read-only
+  - name: distance
+    summary: Current camera distance in meters.
+    type: Number
+    permission: read-only
+
+methods:
+  - name: setProgress
+    summary: Programmatically moves to a logarithmic zoom progress.
+    parameters:
+      - name: options
+        summary: Options for this operation; see the parameter type for its supported fields.
+        type: ZoomControlProgressOptions
+  - name: sync
+    summary: Synchronizes the thumb position with the map camera immediately.
+
+events:
+  - name: zoomstart
+    summary: Fired when a touch interaction begins.
+    properties:
+      - name: progress
+        summary: Logarithmic zoom progress from 0 at maximum distance to 1 at minimum distance.
+        type: Number
+      - name: distance
+        summary: Camera distance in meters.
+        type: Number
+      - name: interactive
+        summary: Whether this zoom change was caused by user interaction.
+        type: Boolean
+  - name: zoomchange
+    summary: Fired as the touch position changes.
+    properties:
+      - name: progress
+        summary: Logarithmic zoom progress from 0 at maximum distance to 1 at minimum distance.
+        type: Number
+      - name: distance
+        summary: Camera distance in meters.
+        type: Number
+      - name: interactive
+        summary: Whether this zoom change was caused by user interaction.
+        type: Boolean
+  - name: zoomend
+    summary: Fired when the touch interaction ends or is cancelled.
+    properties:
+      - name: progress
+        summary: Logarithmic zoom progress from 0 at maximum distance to 1 at minimum distance.
+        type: Number
+      - name: distance
+        summary: Camera distance in meters.
+        type: Number
+      - name: interactive
+        summary: Whether this zoom change was caused by user interaction.
+        type: Boolean
+
+---
+name: ZoomLevelIndicator
+summary: Emoji or text associated with a zoom progress.
+properties:
+  - name: progress
+    summary: Logarithmic zoom progress from 0 at maximum distance to 1 at minimum distance.
+    type: Number
+  - name: title
+    summary: Emoji or text for the zoom-level indicator.
+    type: String
+
+---
+name: ZoomControlProgressOptions
+summary: Options for changing zoom-control progress programmatically.
+properties:
+  - name: progress
+    summary: Logarithmic zoom progress from 0 at maximum distance to 1 at minimum distance.
+    type: Number
+  - name: animated
+    summary: Whether to animate the operation.
+    type: Boolean
+    default: true
+    optional: true
+  - name: duration
+    summary: Animation duration in milliseconds.
+    type: Number
+    default: 240
+    optional: true

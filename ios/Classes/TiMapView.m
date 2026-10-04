@@ -6,10 +6,12 @@
  */
 
 #import "TiMapView.h"
+#import "TiCutoutCircle.h"
 #import "TiMapAnnotationProxy.h"
 #import "TiMapCircleProxy.h"
 #import "TiMapCustomAnnotationView.h"
 #import "TiMapFeatureAnnotationProxy.h"
+#import "TiMapFeaturedAnnotationView.h"
 #import "TiMapImageAnnotationView.h"
 #import "TiMapImageOverlayProxy.h"
 #import "TiMapMarkerAnnotationView.h"
@@ -18,11 +20,24 @@
 #import "TiMapPolygonProxy.h"
 #import "TiMapPolylineProxy.h"
 #import "TiMapRouteProxy.h"
+#import "TiMapUserLocationAnnotationView.h"
 #import "TiMapUtils.h"
 #import <MapKit/MapKit.h>
 #import <TitaniumKit/TiApp.h>
 #import <TitaniumKit/TiBase.h>
 #import <TitaniumKit/TiUtils.h>
+
+@interface TiMapView ()
+
+- (void)configureCustomCompassButton;
+- (void)layoutCustomCompassButton;
+- (void)removeCustomCompassButton;
+- (void)stopZoomDisplayLink;
+- (void)cancelProgrammaticZoomForGesture;
+- (void)notifyZoomDistanceChanged:(CLLocationDistance)distance;
+- (void)fireZoomEvent:(NSString *)name distance:(CLLocationDistance)distance interactive:(BOOL)interactive;
+
+@end
 
 @implementation TiMapView
 
@@ -32,6 +47,13 @@ CLLocationCoordinate2D userNewLocation;
 
 - (void)dealloc
 {
+  [self stopZoomDisplayLink];
+  RELEASE_TO_NIL(zoomObservers);
+  if (compassButton != nil) {
+    compassButton.mapView = nil;
+    [compassButton removeFromSuperview];
+    RELEASE_TO_NIL(compassButton);
+  }
   if (map != nil) {
     map.delegate = nil;
     RELEASE_TO_NIL(map);
@@ -178,6 +200,7 @@ CLLocationCoordinate2D userNewLocation;
 {
   [[self map] setFrame:bounds];
   [super frameSizeChanged:frame bounds:bounds];
+  [self layoutCustomCompassButton];
   if (forceRender) {
     // Set this to NO so that region gets captured.
     ignoreRegionChanged = NO;
@@ -323,9 +346,7 @@ CLLocationCoordinate2D userNewLocation;
   ENSURE_UI_THREAD(removeAllAnnotations, args);
 
   for (id<MKAnnotation> an in self.customAnnotations) {
-
     if (![an isKindOfClass:[MKPointAnnotation class]] && ![an isKindOfClass:[MKPolyline class]] && ![an isKindOfClass:[MKPolygon class]]) {
-
       if (![geoJSONProxies containsObject:an]) {
         [self.map removeAnnotation:an];
       }
@@ -333,23 +354,56 @@ CLLocationCoordinate2D userNewLocation;
   }
 }
 
+/*
+- (void)removeAllAnnotations:(id)args
+{
+  ENSURE_UI_THREAD(removeAllAnnotations, args);
+  [self.map removeAnnotations:self.customAnnotations];
+}
+ */
+
 - (void)removeAllGeoJSON:(id)args
 {
   ENSURE_UI_THREAD(removeAllGeoJSON, args);
 
-  for (MKPointAnnotation *an in geoJSONProxies) {
-    [self.map removeAnnotation:an];
-    [geoJSONProxies removeObject:an];
+  NSLog(@"[ERROR] removeAllGeoJSON called");
+
+  for (MKPointAnnotation *mkpoint in geoJSONProxies) {
+    [self.map removeAnnotation:mkpoint];
+    [geoJSONProxies removeObject:mkpoint];
+
+    NSLog(@"[ERROR] removeAllGeoJSON — MKPointAnnotation");
   }
-  for (MKPolyline *an in geoJSONProxies) {
-    [self.map removeAnnotation:an];
-    [geoJSONProxies removeObject:an];
+  for (MKPolyline *mkpolyline in geoJSONProxies) {
+    [self.map removeAnnotation:mkpolyline];
+    [geoJSONProxies removeObject:mkpolyline];
+
+    NSLog(@"[ERROR] removeAllGeoJSON — MKPolyline");
   }
-  for (MKPolygon *an in geoJSONProxies) {
-    [self.map removeAnnotation:an];
-    [geoJSONProxies removeObject:an];
+  for (MKPolygon *mkpolygon in geoJSONProxies) {
+    [self.map removeAnnotation:mkpolygon];
+    [geoJSONProxies removeObject:mkpolygon];
+
+    NSLog(@"[ERROR] removeAllGeoJSON — MKPolygon");
   }
 }
+
+/*
+- (void)removeAllGeoJSON:(id)args
+{
+  ENSURE_UI_THREAD(removeAllGeoJSON, args);
+
+  //NSLog(@"[ERROR] NEW removeAllGeoJSON called %@", args);
+  NSLog(@"[ERROR] NEW removeAllGeoJSON called");
+
+  for (int i = 0; i < [geoJSONProxies count]; i++) {
+    NSLog(@"[ERROR] Testing for loop %@", i);
+    MKPolygon *proxy = [geoJSONProxies objectAtIndex:i];
+    [self removePolygon:proxy remove:NO];
+  }
+  [geoJSONProxies removeAllObjects];
+}
+*/
 
 - (void)setAnnotations_:(id)value
 {
@@ -400,7 +454,9 @@ CLLocationCoordinate2D userNewLocation;
     return;
   }
 
-  __block MKMapFeatureOptions options;
+  ENSURE_TYPE(args, NSArray);
+
+  __block MKMapFeatureOptions options = 0;
 
   [(NSArray *)args enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
     options |= [TiUtils intValue:obj];
@@ -431,6 +487,34 @@ CLLocationCoordinate2D userNewLocation;
   }
 }
 
+- (void)selectUserLocationAnnotation:(id)args
+{
+  ENSURE_SINGLE_ARG_OR_NIL(args, NSNumber);
+  ENSURE_UI_THREAD(selectUserLocationAnnotation, args);
+
+  MKMapView *mapView = [self map];
+  MKUserLocation *userLocation = mapView.userLocation;
+  if (!mapView.showsUserLocation || userLocation == nil || [mapView viewForAnnotation:userLocation] == nil) {
+    return;
+  }
+
+  [mapView selectAnnotation:userLocation animated:[TiUtils boolValue:args def:YES]];
+}
+
+- (void)deselectUserLocationAnnotation:(id)args
+{
+  ENSURE_SINGLE_ARG_OR_NIL(args, NSNumber);
+  ENSURE_UI_THREAD(deselectUserLocationAnnotation, args);
+
+  MKMapView *mapView = [self map];
+  MKUserLocation *userLocation = mapView.userLocation;
+  if (!mapView.showsUserLocation || userLocation == nil || [mapView viewForAnnotation:userLocation] == nil) {
+    return;
+  }
+
+  [mapView deselectAnnotation:userLocation animated:[TiUtils boolValue:args def:YES]];
+}
+
 - (void)zoom:(id)args
 {
   ENSURE_SINGLE_ARG(args, NSObject);
@@ -452,6 +536,208 @@ CLLocationCoordinate2D userNewLocation;
   }
   region = _region;
   [self render];
+}
+
+- (CLLocationDistance)cameraDistance
+{
+  return [self map].camera.centerCoordinateDistance;
+}
+
+- (void)addZoomObserver:(id<TiMapZoomObserver>)observer
+{
+  if (zoomObservers == nil) {
+    zoomObservers = [[NSHashTable weakObjectsHashTable] retain];
+  }
+  [zoomObservers addObject:observer];
+  [observer mapView:self zoomDistanceDidChange:[self cameraDistance]];
+}
+
+- (void)removeZoomObserver:(id<TiMapZoomObserver>)observer
+{
+  [zoomObservers removeObject:observer];
+}
+
+- (void)effectiveMinimumDistance:(CLLocationDistance *)minimumDistance maximumDistance:(CLLocationDistance *)maximumDistance
+{
+  CLLocationDistance minimum = MAX(1.0, *minimumDistance);
+  CLLocationDistance maximum = MAX(minimum, *maximumDistance);
+  MKMapCameraZoomRange *range = [self map].cameraZoomRange;
+  if (range != nil) {
+    if (isfinite(range.minCenterCoordinateDistance) && range.minCenterCoordinateDistance > 0) {
+      minimum = MAX(minimum, range.minCenterCoordinateDistance);
+    }
+    if (isfinite(range.maxCenterCoordinateDistance) && range.maxCenterCoordinateDistance > 0) {
+      maximum = MIN(maximum, range.maxCenterCoordinateDistance);
+    }
+  }
+  *minimumDistance = minimum;
+  *maximumDistance = MAX(minimum, maximum);
+}
+
+- (CLLocationDistance)clampedZoomDistance:(CLLocationDistance)distance
+{
+  CLLocationDistance minimum = zoomMinimumDistance > 0 ? zoomMinimumDistance : 40.0;
+  CLLocationDistance maximum = zoomMaximumDistance > 0 ? zoomMaximumDistance : 40000000.0;
+  [self effectiveMinimumDistance:&minimum maximumDistance:&maximum];
+  return MIN(maximum, MAX(minimum, distance));
+}
+
+- (void)startZoomDisplayLink
+{
+  if (zoomDisplayLink != nil) {
+    return;
+  }
+  zoomDisplayLink = [[CADisplayLink displayLinkWithTarget:self selector:@selector(updateZoomForDisplayLink:)] retain];
+  if (@available(iOS 15.0, *)) {
+    zoomDisplayLink.preferredFrameRateRange = CAFrameRateRangeMake(30, UIScreen.mainScreen.maximumFramesPerSecond, UIScreen.mainScreen.maximumFramesPerSecond);
+  }
+  [zoomDisplayLink addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];
+}
+
+- (void)stopZoomDisplayLink
+{
+  [zoomDisplayLink invalidate];
+  RELEASE_TO_NIL(zoomDisplayLink);
+}
+
+- (void)applyZoomDistance:(CLLocationDistance)distance
+{
+  MKMapCamera *camera = [[[self map].camera copy] autorelease];
+  camera.centerCoordinateDistance = [self clampedZoomDistance:distance];
+  applyingProgrammaticZoom = YES;
+  [[self map] setCamera:camera animated:NO];
+  applyingProgrammaticZoom = NO;
+  [self notifyZoomDistanceChanged:camera.centerCoordinateDistance];
+}
+
+- (void)updateZoomForDisplayLink:(CADisplayLink *)displayLink
+{
+  if (zoomIsInteractive) {
+    [self applyZoomDistance:zoomTargetDistance];
+    return;
+  }
+
+  NSTimeInterval elapsed = displayLink.timestamp - zoomStartTime;
+  CGFloat progress = zoomDuration <= 0 ? 1.0 : MIN(1.0, elapsed / zoomDuration);
+  CGFloat easedProgress = 1.0 - pow(1.0 - progress, 3.0);
+  double startLog = log(zoomStartDistance);
+  double targetLog = log(zoomTargetDistance);
+  CLLocationDistance distance = exp(startLog + ((targetLog - startLog) * easedProgress));
+  [self applyZoomDistance:distance];
+  [self fireZoomEvent:@"zoomchange" distance:distance interactive:NO];
+
+  if (progress >= 1.0) {
+    [self stopZoomDisplayLink];
+    [self fireZoomEvent:@"zoomend" distance:zoomTargetDistance interactive:NO];
+  }
+}
+
+- (void)zoomBy:(id)args
+{
+  NSDictionary *properties = [args isKindOfClass:[NSDictionary class]] ? args : nil;
+  double level = properties != nil ? [TiUtils doubleValue:@"level" properties:properties def:0] : [TiUtils doubleValue:args];
+  if (level == 0) {
+    return;
+  }
+
+  zoomMinimumDistance = properties != nil ? [TiUtils doubleValue:@"minimumDistance" properties:properties def:40] : 40;
+  zoomMaximumDistance = properties != nil ? [TiUtils doubleValue:@"maximumDistance" properties:properties def:40000000] : 40000000;
+  CLLocationDistance currentDistance = MAX(1.0, [self cameraDistance]);
+  BOOL alreadyZooming = zoomDisplayLink != nil && !zoomIsInteractive;
+  CLLocationDistance baseDistance = alreadyZooming ? zoomTargetDistance : currentDistance;
+  zoomTargetDistance = [self clampedZoomDistance:(baseDistance * pow(2.0, -level))];
+  zoomStartDistance = currentDistance;
+  zoomDuration = properties != nil ? MAX(0, [TiUtils doubleValue:@"duration" properties:properties def:240] / 1000.0) : 0.24;
+  zoomStartTime = CACurrentMediaTime();
+  zoomIsInteractive = NO;
+  if (!alreadyZooming) {
+    [self fireZoomEvent:@"zoomstart" distance:currentDistance interactive:NO];
+  }
+  if (zoomDuration == 0) {
+    [self applyZoomDistance:zoomTargetDistance];
+    [self fireZoomEvent:@"zoomchange" distance:zoomTargetDistance interactive:NO];
+    [self fireZoomEvent:@"zoomend" distance:zoomTargetDistance interactive:NO];
+    return;
+  }
+  [self startZoomDisplayLink];
+}
+
+- (void)zoomTo:(id)args
+{
+  ENSURE_TYPE(args, NSDictionary);
+  zoomMinimumDistance = [TiUtils doubleValue:@"minimumDistance" properties:args def:40];
+  zoomMaximumDistance = [TiUtils doubleValue:@"maximumDistance" properties:args def:40000000];
+  zoomStartDistance = MAX(1.0, [self cameraDistance]);
+  zoomTargetDistance = [self clampedZoomDistance:[TiUtils doubleValue:@"distance" properties:args def:zoomStartDistance]];
+  zoomDuration = [TiUtils boolValue:@"animated" properties:args def:YES] ? MAX(0, [TiUtils doubleValue:@"duration" properties:args def:240] / 1000.0) : 0;
+  zoomStartTime = CACurrentMediaTime();
+  zoomIsInteractive = NO;
+  [self fireZoomEvent:@"zoomstart" distance:zoomStartDistance interactive:NO];
+  if (zoomDuration == 0) {
+    [self applyZoomDistance:zoomTargetDistance];
+    [self fireZoomEvent:@"zoomchange" distance:zoomTargetDistance interactive:NO];
+    [self fireZoomEvent:@"zoomend" distance:zoomTargetDistance interactive:NO];
+    return;
+  }
+  [self startZoomDisplayLink];
+}
+
+- (void)beginInteractiveZoomWithMinimumDistance:(CLLocationDistance)minimumDistance maximumDistance:(CLLocationDistance)maximumDistance
+{
+  zoomMinimumDistance = minimumDistance;
+  zoomMaximumDistance = maximumDistance;
+  [self effectiveMinimumDistance:&zoomMinimumDistance maximumDistance:&zoomMaximumDistance];
+  zoomTargetDistance = [self clampedZoomDistance:[self cameraDistance]];
+  zoomIsInteractive = YES;
+  [self fireZoomEvent:@"zoomstart" distance:zoomTargetDistance interactive:YES];
+  [self startZoomDisplayLink];
+}
+
+- (void)updateInteractiveZoomToDistance:(CLLocationDistance)distance
+{
+  zoomTargetDistance = [self clampedZoomDistance:distance];
+  [self fireZoomEvent:@"zoomchange" distance:zoomTargetDistance interactive:YES];
+}
+
+- (void)endInteractiveZoom
+{
+  if (!zoomIsInteractive) {
+    return;
+  }
+  [self applyZoomDistance:zoomTargetDistance];
+  zoomIsInteractive = NO;
+  [self stopZoomDisplayLink];
+  [self fireZoomEvent:@"zoomend" distance:zoomTargetDistance interactive:YES];
+}
+
+- (void)cancelProgrammaticZoomForGesture
+{
+  if (zoomDisplayLink == nil || applyingProgrammaticZoom) {
+    return;
+  }
+  [self stopZoomDisplayLink];
+  BOOL wasInteractive = zoomIsInteractive;
+  zoomIsInteractive = NO;
+  [self fireZoomEvent:@"zoomend" distance:[self cameraDistance] interactive:wasInteractive];
+}
+
+- (void)notifyZoomDistanceChanged:(CLLocationDistance)distance
+{
+  for (id<TiMapZoomObserver> observer in zoomObservers.allObjects) {
+    [observer mapView:self zoomDistanceDidChange:distance];
+  }
+}
+
+- (void)fireZoomEvent:(NSString *)name distance:(CLLocationDistance)distance interactive:(BOOL)interactive
+{
+  if (![[self proxy] _hasListeners:name]) {
+    return;
+  }
+  [[self proxy] fireEvent:name
+               withObject:@{
+                 @"distance" : @(distance),
+                 @"interactive" : @(interactive)
+               }];
 }
 
 - (MKCoordinateRegion)regionFromDict:(NSDictionary *)dict
@@ -623,8 +909,21 @@ CLLocationCoordinate2D userNewLocation;
   }
 }
 
+- (void)setUserLocationSelectedImage_:(id)value
+{
+  if (map == nil || ![TiUtils isIOSVersionOrGreater:@"14.0"]) {
+    return;
+  }
+
+  MKAnnotationView *annotationView = [map viewForAnnotation:map.userLocation];
+  if ([annotationView isKindOfClass:[TiMapUserLocationAnnotationView class]]) {
+    [(TiMapUserLocationAnnotationView *)annotationView setSelectedImageSource:value proxy:self.proxy];
+  }
+}
+
 - (void)setLocation:(id)location
 {
+  [self cancelProgrammaticZoomForGesture];
   ENSURE_SINGLE_ARG(location, NSDictionary);
   // comes in like region: {latitude:100, longitude:100, latitudeDelta:0.5, longitudeDelta:0.5}
   id lat = [location objectForKey:@"latitude"];
@@ -955,11 +1254,84 @@ CLLocationCoordinate2D userNewLocation;
   [self setCompassEnabled_:value];
 }
 
+- (void)configureCustomCompassButton
+{
+  MKMapView *mapView = [self map];
+  BOOL enabled = compassButton != nil ? compassButton.compassVisibility != MKFeatureVisibilityHidden : mapView.showsCompass;
+
+  mapView.showsCompass = NO;
+  if (compassButton == nil) {
+    compassButton = [[MKCompassButton compassButtonWithMapView:mapView] retain];
+    compassButton.compassVisibility = enabled ? MKFeatureVisibilityAdaptive : MKFeatureVisibilityHidden;
+    [compassButton sizeToFit];
+    [self addSubview:compassButton];
+  }
+
+  [self layoutCustomCompassButton];
+}
+
+- (void)layoutCustomCompassButton
+{
+  if (compassButton == nil) {
+    return;
+  }
+
+  [compassButton sizeToFit];
+  CGSize size = compassButton.bounds.size;
+  if (size.width <= 0 || size.height <= 0) {
+    size = CGSizeMake(44, 44);
+  }
+
+  CGRect bounds = self.bounds;
+  CGFloat x = compassHasLeft ? compassLeft : CGRectGetWidth(bounds) - size.width - (compassHasRight ? compassRight : 8);
+  CGFloat y = compassHasTop ? compassTop : CGRectGetHeight(bounds) - size.height - (compassHasBottom ? compassBottom : 8);
+  compassButton.frame = CGRectMake(x, y, size.width, size.height);
+}
+
+- (void)removeCustomCompassButton
+{
+  if (compassButton == nil) {
+    return;
+  }
+
+  BOOL enabled = compassButton.compassVisibility != MKFeatureVisibilityHidden;
+  compassButton.mapView = nil;
+  [compassButton removeFromSuperview];
+  RELEASE_TO_NIL(compassButton);
+  [self map].showsCompass = enabled;
+}
+
 - (void)setCompassEnabled_:(id)value
 {
   TiThreadPerformOnMainThread(
       ^{
-        [[self map] setShowsCompass:[TiUtils boolValue:value]];
+        BOOL enabled = [TiUtils boolValue:value];
+        if (compassPositionConfigured) {
+          [self configureCustomCompassButton];
+          compassButton.compassVisibility = enabled ? MKFeatureVisibilityAdaptive : MKFeatureVisibilityHidden;
+        } else {
+          [[self map] setShowsCompass:enabled];
+        }
+      },
+      YES);
+}
+
+- (void)setCompassPosition_:(id)value
+{
+  ENSURE_TYPE_OR_NIL(value, NSDictionary);
+  TiThreadPerformOnMainThread(
+      ^{
+        compassPositionConfigured = value != nil;
+        if (!compassPositionConfigured) {
+          [self removeCustomCompassButton];
+          return;
+        }
+
+        compassTop = [TiUtils floatValue:@"top" properties:value def:0 exists:&compassHasTop];
+        compassLeft = [TiUtils floatValue:@"left" properties:value def:0 exists:&compassHasLeft];
+        compassBottom = [TiUtils floatValue:@"bottom" properties:value def:0 exists:&compassHasBottom];
+        compassRight = [TiUtils floatValue:@"right" properties:value def:0 exists:&compassHasRight];
+        [self configureCustomCompassButton];
       },
       YES);
 }
@@ -995,15 +1367,35 @@ CLLocationCoordinate2D userNewLocation;
 
 - (void)setPadding_:(id)value
 {
+  UIEdgeInsets insets = [TiUtils contentInsets:value];
+  BOOL animated = [value isKindOfClass:[NSDictionary class]] && [TiUtils boolValue:@"animated" properties:value def:NO];
+  double duration = [value isKindOfClass:[NSDictionary class]] ? [TiUtils doubleValue:@"duration" properties:value def:300] : 300;
+  duration = MAX(0, duration);
+
   TiThreadPerformOnMainThread(
       ^{
-        [self map].layoutMargins = [TiUtils contentInsets:value];
+        MKMapView *mapView = [self map];
+        if (!animated || duration == 0) {
+          mapView.layoutMargins = insets;
+          return;
+        }
+
+        [mapView layoutIfNeeded];
+        [UIView animateWithDuration:(duration / 1000)
+                              delay:0
+                            options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionAllowUserInteraction
+                         animations:^{
+                           mapView.layoutMargins = insets;
+                           [mapView layoutIfNeeded];
+                         }
+                         completion:nil];
       },
       YES);
 }
 
 - (void)animateCamera:(id)args
 {
+  [self cancelProgrammaticZoomForGesture];
   enum Args {
     kArgAnimationDict = 0,
     kArgCount,
@@ -1039,6 +1431,10 @@ CLLocationCoordinate2D userNewLocation;
 - (void)showAnnotations:(id)args
 {
   ENSURE_SINGLE_ARG_OR_NIL(args, NSArray);
+
+  // if (![annotation isKindOfClass:[MKMapFeatureAnnotation class]]) {return;}
+  //  Notes
+  //  Calling mapView.showAnnotations() whilst a 'territory' MKFeatureAnnotation is selected causes and error (followed by an app crash).
 
   TiThreadPerformOnMainThread(
       ^{
@@ -1076,7 +1472,6 @@ CLLocationCoordinate2D userNewLocation;
 
 #pragma mark Delegates
 
-// Delegate for >= iOS 8
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
 {
   if ((status == kCLAuthorizationStatusAuthorizedWhenInUse) || (status == kCLAuthorizationStatusAuthorizedAlways)) {
@@ -1084,14 +1479,38 @@ CLLocationCoordinate2D userNewLocation;
   }
 }
 
-// Delegate for >= iOS 7
 - (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id<MKOverlay>)overlay
 {
+
+  NSDictionary *circleConfiguration = [[self proxy] valueForKey:@"cutoutCircle"];
+
+  // Configure cutout circles in a special way, as they do not own an own proxy
+  if ([overlay isKindOfClass:[TiCutoutCircle class]] && circleConfiguration != nil) {
+    UIColor *overlayColor = [TiUtils colorValue:@"overlayColor" properties:circleConfiguration def:[TiColor colorNamed:@"black"]].color;
+    UIColor *strokeColor = [TiUtils colorValue:@"strokeColor" properties:circleConfiguration def:[TiColor colorNamed:@"black"]].color;
+    CGFloat lineWidth = [TiUtils floatValue:@"strokeWidth" properties:circleConfiguration def:1.0];
+
+    MKPolygonRenderer *renderer = [[MKPolygonRenderer alloc] initWithOverlay:overlay];
+    renderer.lineWidth = lineWidth;
+    renderer.strokeColor = strokeColor;
+    renderer.fillColor = overlayColor;
+
+    return renderer;
+  }
+
   return (MKOverlayRenderer *)CFDictionaryGetValue(mapObjects2View, overlay);
 }
 
 - (void)mapView:(MKMapView *)mapView regionWillChangeAnimated:(BOOL)animated
 {
+  if (zoomDisplayLink != nil && !applyingProgrammaticZoom) {
+    for (UIGestureRecognizer *gestureRecognizer in mapView.gestureRecognizers) {
+      if (gestureRecognizer.state == UIGestureRecognizerStateBegan || gestureRecognizer.state == UIGestureRecognizerStateChanged) {
+        [self cancelProgrammaticZoomForGesture];
+        break;
+      }
+    }
+  }
   if (ignoreRegionChanged) {
     return;
   }
@@ -1114,6 +1533,9 @@ CLLocationCoordinate2D userNewLocation;
 
   region = [mapView region];
   [self.proxy replaceValue:[self dictionaryFromRegion] forKey:@"region" notification:NO];
+  if (zoomDisplayLink == nil) {
+    [self notifyZoomDistanceChanged:mapView.camera.centerCoordinateDistance];
+  }
 
   if ([self.proxy _hasListeners:@"regionChanged"]) {
     DEPRECATED_REPLACED(@"Map.View.Event.regionChanged", @"5.4.0", @"Map.View.Event.regionchanged");
@@ -1238,7 +1660,10 @@ CLLocationCoordinate2D userNewLocation;
       @"url" : NULL_IF_NIL(mapItem.url.absoluteString),
       @"place" : [TiMapUtils dictionaryFromPlacemark:mapItem.placemark],
       @"latitude" : @(annotation.coordinate.latitude),
-      @"longitude" : @(annotation.coordinate.longitude)
+      @"longitude" : @(annotation.coordinate.longitude),
+      @"identifier" : NULL_IF_NIL(mapItem.identifier.identifierString)
+      //@"alternateIdentifiers" : NULL_IF_NIL(mapItem.alternateIdentifiers)
+      // "alternateIdentifiers" Crashes App — Need to format correctly — https://developer.apple.com/documentation/mapkit/mkmapitem/4354086-alternateidentifiers?language=objc
     };
 
     [[self proxy] fireEvent:@"poiclick" withObject:event];
@@ -1246,28 +1671,36 @@ CLLocationCoordinate2D userNewLocation;
 }
 #endif
 
-#if IS_SDK_IOS_16
- - (void)mapView:(MKMapView *)mapView didDeselectAnnotation:(id<MKAnnotation>)annotation
- {
-   if (![TiUtils isIOSVersionOrGreater:@"16.0"]) {
-     return;
-   }
+- (void)fireUserLocationAnnotationEvent:(NSString *)eventName annotation:(MKUserLocation *)userLocation
+{
+  TiProxy *mapProxy = self.proxy;
+  if (![mapProxy _hasListeners:eventName]) {
+    return;
+  }
 
-   if ([annotation isKindOfClass:MKMapFeatureAnnotation.class]) {
-     [self.proxy fireEvent:@"poideselect"];
-   }
- }
- #endif
- 
+  CLLocationCoordinate2D coordinate = userLocation.coordinate;
+  NSDictionary *event = @{
+    @"map" : mapProxy,
+    @"latitude" : @(coordinate.latitude),
+    @"longitude" : @(coordinate.longitude)
+  };
+  [mapProxy fireEvent:eventName withObject:event];
+}
+
 - (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view
 {
+  if ([view.annotation isKindOfClass:[MKUserLocation class]]) {
+    [self fireUserLocationAnnotationEvent:@"userlocationannotationselected" annotation:(MKUserLocation *)view.annotation];
+    return;
+  }
+
   if ([view conformsToProtocol:@protocol(TiMapAnnotation)]) {
     BOOL isSelected = [view isSelected];
     MKAnnotationView<TiMapAnnotation> *ann = (MKAnnotationView<TiMapAnnotation> *)view;
 
     selectedAnnotation = [ann retain];
 
-    // If canShowCallout == YES we will try to find calloutView to hadleTap on callout
+    // If canShowCallout == YES we will try to find calloutView to handle tap on callout
     if ([ann canShowCallout]) {
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
         [self findCalloutView:ann];
@@ -1291,8 +1724,26 @@ CLLocationCoordinate2D userNewLocation;
   }
 }
 
+#if IS_SDK_IOS_16
+- (void)mapView:(MKMapView *)mapView didDeselectAnnotation:(id<MKAnnotation>)annotation
+{
+  if (![TiUtils isIOSVersionOrGreater:@"16.0"]) {
+    return;
+  }
+
+  if ([annotation isKindOfClass:MKMapFeatureAnnotation.class]) {
+    [self.proxy fireEvent:@"poideselect"];
+  }
+}
+#endif
+
 - (void)mapView:(MKMapView *)mapView didDeselectAnnotationView:(MKAnnotationView *)view
 {
+  if ([view.annotation isKindOfClass:[MKUserLocation class]]) {
+    [self fireUserLocationAnnotationEvent:@"userlocationannotationdeselected" annotation:(MKUserLocation *)view.annotation];
+    return;
+  }
+
   if ([view conformsToProtocol:@protocol(TiMapAnnotation)]) {
     BOOL isSelected = [view isSelected];
     MKAnnotationView<TiMapAnnotation> *ann = (MKAnnotationView<TiMapAnnotation> *)view;
@@ -1323,6 +1774,7 @@ CLLocationCoordinate2D userNewLocation;
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotationProxy:(TiMapAnnotationProxy *)ann
 {
   BOOL marker = [TiUtils boolValue:[ann valueForUndefinedKey:@"showAsMarker"] def:NO];
+  BOOL featuredMarker = [TiUtils boolValue:[ann valueForUndefinedKey:@"showAsFeaturedMarker"] def:NO];
 
   id customView = [ann valueForUndefinedKey:@"customView"];
   if ((customView == nil) || (customView == [NSNull null]) || (![customView isKindOfClass:[TiViewProxy class]])) {
@@ -1331,7 +1783,9 @@ CLLocationCoordinate2D userNewLocation;
 
   NSString *identifier = nil;
   UIImage *image = nil;
-  if (customView == nil && !marker) {
+  if (customView == nil && featuredMarker) {
+    identifier = @"timap-featured-marker";
+  } else if (customView == nil && !marker) {
     id imagePath = [ann valueForUndefinedKey:@"image"];
     image = [TiUtils image:imagePath proxy:ann];
     identifier = (image != nil) ? @"timap-image" : @"timap-marker";
@@ -1344,14 +1798,26 @@ CLLocationCoordinate2D userNewLocation;
   if (annView == nil) {
     if ([identifier isEqualToString:@"timap-customView"]) {
       annView = [[[TiMapCustomAnnotationView alloc] initWithAnnotation:ann reuseIdentifier:identifier map:self] autorelease];
+    } else if ([identifier isEqualToString:@"timap-featured-marker"]) {
+      annView = [[[TiMapFeaturedAnnotationView alloc] initWithAnnotation:ann reuseIdentifier:identifier map:self] autorelease];
     } else if ([identifier isEqualToString:@"timap-image"]) {
       annView = [[[TiMapImageAnnotationView alloc] initWithAnnotation:ann reuseIdentifier:identifier map:self image:image] autorelease];
     } else {
       annView = [[[TiMapMarkerAnnotationView alloc] initWithAnnotation:ann reuseIdentifier:identifier map:self] autorelease];
     }
   }
+  annView.canShowCallout = [TiUtils boolValue:[ann valueForUndefinedKey:@"canShowCallout"] def:YES];
   if ([identifier isEqualToString:@"timap-customView"]) {
     [((TiMapCustomAnnotationView *)annView) setProxy:customView];
+  } else if ([identifier isEqualToString:@"timap-featured-marker"]) {
+    annView.annotation = ann;
+    [((TiMapFeaturedAnnotationView *)annView) setImageSource:[ann valueForUndefinedKey:@"image"] proxy:ann];
+    [((TiMapFeaturedAnnotationView *)annView) setMarkerShadow:[ann valueForUndefinedKey:@"featuredMarkerShadow"]
+                                         selectedMarkerShadow:[ann valueForUndefinedKey:@"featuredMarkerSelectedShadow"]];
+    [((TiMapFeaturedAnnotationView *)annView) setTitle:[ann title]
+                                              subtitle:[ann subtitle]
+                                       titleVisibility:(MKFeatureVisibility)[TiUtils intValue:[ann valueForUndefinedKey:@"markerTitleVisibility"]]
+                                    subtitleVisibility:(MKFeatureVisibility)[TiUtils intValue:[ann valueForUndefinedKey:@"markerSubtitleVisibility"]]];
   } else if ([identifier isEqualToString:@"timap-image"]) {
     annView.image = image;
   } else {
@@ -1365,9 +1831,9 @@ CLLocationCoordinate2D userNewLocation;
     markerView.titleVisibility = [TiUtils intValue:[ann valueForUndefinedKey:@"markerTitleVisibility"]];
     markerView.subtitleVisibility = [TiUtils intValue:[ann valueForUndefinedKey:@"markerSubtitleVisibility"]];
   }
-  annView.canShowCallout = [TiUtils boolValue:[ann valueForUndefinedKey:@"canShowCallout"] def:YES];
   annView.enabled = YES;
-  annView.centerOffset = ann.offset;
+  id centerOffset = [ann valueForUndefinedKey:@"centerOffset"];
+  annView.centerOffset = featuredMarker && customView == nil && centerOffset == nil ? [(TiMapFeaturedAnnotationView *)annView defaultCenterOffset] : ann.offset;
   annView.clusteringIdentifier = [ann valueForUndefinedKey:@"clusterIdentifier"];
   annView.collisionMode = [TiUtils intValue:[ann valueForUndefinedKey:@"collisionMode"]];
   annView.displayPriority = [TiUtils floatValue:[ann valueForUndefinedKey:@"annotationDisplayPriority"] def:1000];
@@ -1425,7 +1891,7 @@ CLLocationCoordinate2D userNewLocation;
 }
 // mapView:viewForAnnotation: provides the view for each annotation.
 // This method may be called for all or some of the added annotations.
-// For MapKit provided annotations (eg. MKUserLocation) return nil to use the MapKit provided annotatiown view.
+// For MapKit provided annotations (e.g. MKUserLocation) return nil to use the MapKit provided annotation view.
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
 {
   if ([annotation isKindOfClass:[TiMapAnnotationProxy class]]) {
@@ -1440,6 +1906,19 @@ CLLocationCoordinate2D userNewLocation;
     clusterAnnotation.title = [annotationProxy valueForUndefinedKey:@"title"];
     clusterAnnotation.subtitle = [annotationProxy valueForUndefinedKey:@"subtitle"];
     return [self mapView:mapView viewForAnnotationProxy:annotationProxy];
+  } else if ([annotation isKindOfClass:[MKUserLocation class]]) {
+    id selectedImage = [self.proxy valueForUndefinedKey:@"userLocationSelectedImage"];
+    if (@available(iOS 14.0, *)) {
+      NSString *identifier = @"timap-user-location";
+      TiMapUserLocationAnnotationView *userLocationView = (TiMapUserLocationAnnotationView *)[mapView dequeueReusableAnnotationViewWithIdentifier:identifier];
+      if (userLocationView == nil) {
+        userLocationView = [[[TiMapUserLocationAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:identifier] autorelease];
+      } else {
+        userLocationView.annotation = annotation;
+      }
+      [userLocationView setSelectedImageSource:selectedImage proxy:self.proxy];
+      return userLocationView;
+    }
   }
   return nil;
 }
@@ -1629,7 +2108,7 @@ CLLocationCoordinate2D userNewLocation;
         // Polyline points are equal, which means line length is zero. Use distance from one of the poly points.
         distanceFromLine = lengthA;
       } else {
-        // Touch point is between polyline's points. Calculte distance with Heron's formula.
+        // Touch point is between polyline's points. Calculate distance with Heron's formula.
         double value = (lengthA + lengthB + lengthC) / 2.0;
         double area = sqrt((value - lengthA) * (value - lengthB) * (value - lengthC) * value);
         distanceFromLine = (area * 2.0) / lengthC;

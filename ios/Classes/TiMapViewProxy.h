@@ -22,8 +22,8 @@
   NSMutableArray *circlesToRemove;
   NSMutableArray *polylinesToAdd;
   NSMutableArray *polylinesToRemove;
-  NSMutableArray *imageOvelaysToAdd;
-  NSMutableArray *imageOvelaysToRemove;
+  NSMutableArray *imageOverlaysToAdd;
+  NSMutableArray *imageOverlaysToRemove;
 
   int zoomCount; // Number of times to zoom in/out on initial display
 }
@@ -45,7 +45,12 @@
 - (void)showAllAnnotations:(id)unused;
 - (void)selectAnnotation:(id)args;
 - (void)deselectAnnotation:(id)args;
+- (void)selectUserLocationAnnotation:(id)args;
+- (void)deselectUserLocationAnnotation:(id)args;
 - (void)zoom:(id)args;
+- (void)zoomBy:(id)args;
+- (void)zoomTo:(id)args;
+- (NSNumber *)cameraDistance;
 - (void)addRoute:(id)args;
 - (void)removeRoute:(id)args;
 - (void)addPolygons:(id)args;

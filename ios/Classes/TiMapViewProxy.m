@@ -5,6 +5,7 @@
  * Please see the LICENSE included with this distribution for details.
  */
 #import "TiMapViewProxy.h"
+#import "TiCutoutCircle.h"
 #import "TiMapAnnotationProxy.h"
 #import "TiMapCircleProxy.h"
 #import "TiMapImageOverlayProxy.h"
@@ -40,8 +41,8 @@
   RELEASE_TO_NIL(circlesToRemove);
   RELEASE_TO_NIL(polylinesToAdd);
   RELEASE_TO_NIL(polylinesToRemove);
-  RELEASE_TO_NIL(imageOvelaysToAdd);
-  RELEASE_TO_NIL(imageOvelaysToRemove);
+  RELEASE_TO_NIL(imageOverlaysToAdd);
+  RELEASE_TO_NIL(imageOverlaysToRemove);
   [super _destroy];
 }
 
@@ -123,11 +124,11 @@
     [ourView removePolyline:arg];
   }
 
-  for (id arg in imageOvelaysToAdd) {
+  for (id arg in imageOverlaysToAdd) {
     [ourView addImageOverlay:arg];
   }
 
-  for (id arg in imageOvelaysToRemove) {
+  for (id arg in imageOverlaysToRemove) {
     [ourView removeImageOverlay:arg];
   }
 
@@ -233,6 +234,30 @@
   }
 }
 
+- (void)selectUserLocationAnnotation:(id)arg
+{
+  ENSURE_SINGLE_ARG_OR_NIL(arg, NSNumber);
+  if ([self viewAttached]) {
+    TiThreadPerformOnMainThread(
+        ^{
+          [(TiMapView *)[self view] selectUserLocationAnnotation:arg];
+        },
+        NO);
+  }
+}
+
+- (void)deselectUserLocationAnnotation:(id)arg
+{
+  ENSURE_SINGLE_ARG_OR_NIL(arg, NSNumber);
+  if ([self viewAttached]) {
+    TiThreadPerformOnMainThread(
+        ^{
+          [(TiMapView *)[self view] deselectUserLocationAnnotation:arg];
+        },
+        NO);
+  }
+}
+
 - (void)setLocation:(id)args
 {
   if ([self viewAttached]) {
@@ -287,6 +312,55 @@
   } else {
     for (id annotation in newAnnotations) {
       [self addAnnotation:annotation];
+    }
+  }
+}
+
+- (void)addCutoutCircle:(id)arg
+{
+  ENSURE_SINGLE_ARG(arg, NSDictionary);
+
+  [self replaceValue:arg forKey:@"cutoutCircle" notification:NO];
+
+  CGFloat latitude = [TiUtils floatValue:@"latitude" properties:arg];
+  CGFloat longitude = [TiUtils floatValue:@"longitude" properties:arg];
+  CGFloat radius = [TiUtils doubleValue:@"radius" properties:arg];
+  double tolerance = [TiUtils doubleValue:@"tolerance" properties:arg def:3.0];
+
+  CLLocationCoordinate2D WORLD_COORDINATES[6];
+  WORLD_COORDINATES[0] = CLLocationCoordinate2DMake(90, 0);
+  WORLD_COORDINATES[1] = CLLocationCoordinate2DMake(90, 180);
+  WORLD_COORDINATES[2] = CLLocationCoordinate2DMake(-90, 180);
+  WORLD_COORDINATES[3] = CLLocationCoordinate2DMake(-90, 0);
+  WORLD_COORDINATES[4] = CLLocationCoordinate2DMake(-90, -180);
+  WORLD_COORDINATES[5] = CLLocationCoordinate2DMake(90, -180);
+
+  CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude, longitude);
+  NSArray<NSDictionary *> *circleCoordinates = [TiMapUtils generateCircleCoordinates:coordinate
+                                                                          withRadius:radius
+                                                                        andTolerance:tolerance];
+
+  CLLocationCoordinate2D *circleCoordinatesNative = malloc(sizeof(CLLocationCoordinate2D) * [circleCoordinates count]);
+
+  for (NSUInteger i = 0; i < [circleCoordinates count]; ++i) {
+    CLLocationCoordinate2D coordinate = [TiMapUtils processLocation:[circleCoordinates objectAtIndex:i]];
+    circleCoordinatesNative[i] = coordinate;
+  }
+
+  MKPolygon *circlePolygon = [MKPolygon polygonWithCoordinates:circleCoordinatesNative count:circleCoordinates.count];
+  TiCutoutCircle *cutoutPolygon = [TiCutoutCircle polygonWithCoordinates:WORLD_COORDINATES count:6 interiorPolygons:@[ circlePolygon ]];
+
+  [[(TiMapView *)[self view] map] addOverlay:cutoutPolygon];
+}
+
+- (void)removeCutoutCircle:(id)unused
+{
+  MKMapView *mapView = [(TiMapView *)[self view] map];
+  NSArray<id<MKOverlay>> *overlays = [mapView overlays];
+
+  for (id<MKOverlay> overlay in overlays) {
+    if ([overlay isKindOfClass:[TiCutoutCircle class]]) {
+      [mapView removeOverlay:overlay];
     }
   }
 }
@@ -439,11 +513,15 @@
 
 - (void)removeAllGeoJSON:(id)unused
 {
-  TiThreadPerformOnMainThread(
-      ^{
-        [(TiMapView *)[self view] removeAllGeoJSON:unused];
-      },
-      NO);
+  NSLog(@"[ERROR] removeAllGeoJSON :: TiMapViewProxy.m");
+
+  if ([self viewAttached]) {
+    TiThreadPerformOnMainThread(
+        ^{
+          [(TiMapView *)[self view] removeAllGeoJSON:unused];
+        },
+        NO);
+  }
 }
 
 - (void)addRoute:(id)arg
@@ -814,13 +892,13 @@
         },
         NO);
   } else {
-    if (imageOvelaysToAdd == nil) {
-      imageOvelaysToAdd = [[NSMutableArray alloc] init];
+    if (imageOverlaysToAdd == nil) {
+      imageOverlaysToAdd = [[NSMutableArray alloc] init];
     }
-    if (imageOvelaysToRemove != nil && [imageOvelaysToRemove containsObject:arg]) {
-      [imageOvelaysToRemove removeObject:arg];
+    if (imageOverlaysToRemove != nil && [imageOverlaysToRemove containsObject:arg]) {
+      [imageOverlaysToRemove removeObject:arg];
     } else {
-      [imageOvelaysToAdd addObject:arg];
+      [imageOverlaysToAdd addObject:arg];
     }
   }
 }
@@ -836,13 +914,13 @@
         },
         NO);
   } else {
-    if (imageOvelaysToRemove == nil) {
-      imageOvelaysToRemove = [[NSMutableArray alloc] init];
+    if (imageOverlaysToRemove == nil) {
+      imageOverlaysToRemove = [[NSMutableArray alloc] init];
     }
-    if (imageOvelaysToAdd != nil && [imageOvelaysToAdd containsObject:arg]) {
-      [imageOvelaysToAdd removeObject:arg];
+    if (imageOverlaysToAdd != nil && [imageOverlaysToAdd containsObject:arg]) {
+      [imageOverlaysToAdd removeObject:arg];
     } else {
-      [imageOvelaysToRemove addObject:arg];
+      [imageOverlaysToRemove addObject:arg];
     }
   }
 }
@@ -873,14 +951,14 @@
   if (attached) {
     TiThreadPerformOnMainThread(
         ^{
-          [(TiMapView *)[self view] addImageOverlays:imageOvelaysToAdd];
+          [(TiMapView *)[self view] addImageOverlays:imageOverlaysToAdd];
           [initialImageOverlays release];
         },
         NO);
   } else {
-    RELEASE_TO_NIL(imageOvelaysToAdd);
-    RELEASE_TO_NIL(imageOvelaysToRemove);
-    imageOvelaysToAdd = [[NSMutableArray alloc] initWithArray:initialImageOverlays];
+    RELEASE_TO_NIL(imageOverlaysToAdd);
+    RELEASE_TO_NIL(imageOverlaysToRemove);
+    imageOverlaysToAdd = [[NSMutableArray alloc] initWithArray:initialImageOverlays];
   }
 }
 
@@ -911,6 +989,36 @@
   TiThreadPerformOnMainThread(
       ^{
         [(TiMapView *)[self view] animateCamera:args];
+      },
+      NO);
+}
+
+- (NSNumber *)cameraDistance
+{
+  if (![self viewAttached]) {
+    return @(0);
+  }
+  return [TiMapUtils returnValueOnMainThread:^id {
+    return @([(TiMapView *)[self view] cameraDistance]);
+  }];
+}
+
+- (void)zoomBy:(id)args
+{
+  ENSURE_SINGLE_ARG(args, NSObject);
+  TiThreadPerformOnMainThread(
+      ^{
+        [(TiMapView *)[self view] zoomBy:args];
+      },
+      NO);
+}
+
+- (void)zoomTo:(id)args
+{
+  ENSURE_SINGLE_ARG(args, NSDictionary);
+  TiThreadPerformOnMainThread(
+      ^{
+        [(TiMapView *)[self view] zoomTo:args];
       },
       NO);
 }

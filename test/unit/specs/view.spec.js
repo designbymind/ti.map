@@ -38,6 +38,14 @@ describe('ti.map.View', () => {
 			enableZoomControls: true,
 			indoorEnabled: true,
 			mapToolbarEnabled: true,
+			padding: {
+				top: 10,
+				left: 20,
+				bottom: 30,
+				right: 40,
+				animated: false,
+				duration: 300,
+			},
 			maxZoomLevel: 2,
 			minZoomLevel: 1,
 			pitchEnabled: true,
@@ -50,11 +58,16 @@ describe('ti.map.View', () => {
 			showsTraffic: true,
 			traffic: true,
 			userLocation: true,
+			userLocationSelectedImage: 'user-avatar.png',
 			userLocationButton: true,
 			zOrderOnTop: true,
 			zoom: 2,
 			zoomEnabled: true,
 		});
+
+		if (!ANDROID) {
+			mapview.compassPosition = { top: 12, right: 16 };
+		}
 	});
 
 	it('.apiName is Ti.MapView', () => {
@@ -116,6 +129,12 @@ describe('ti.map.View', () => {
 			expect(mapview.deselectAnnotation).toEqual(jasmine.any(Function));
 		});
 
+		if (!ANDROID) {
+			it('#deselectUserLocationAnnotation() is a Function', () => {
+				expect(mapview.deselectUserLocationAnnotation).toEqual(jasmine.any(Function));
+			});
+		}
+
 		it('#removeAllAnnotations() is a Function', () => {
 			expect(mapview.removeAllAnnotations).toEqual(jasmine.any(Function));
 		});
@@ -167,6 +186,12 @@ describe('ti.map.View', () => {
 		it('#selectAnnotation() is a Function', () => {
 			expect(mapview.selectAnnotation).toEqual(jasmine.any(Function));
 		});
+
+		if (!ANDROID) {
+			it('#selectUserLocationAnnotation() is a Function', () => {
+				expect(mapview.selectUserLocationAnnotation).toEqual(jasmine.any(Function));
+			});
+		}
 
 		it('#setClusterAnnotation() is a Function', () => {
 			expect(mapview.setClusterAnnotation).toEqual(jasmine.any(Function));
@@ -222,6 +247,16 @@ describe('ti.map.View', () => {
 			expect(mapview.compassEnabled).toEqual(true);
 		});
 
+		if (!ANDROID) {
+			it('.compassPosition is an Object', () => {
+				expect(mapview.compassPosition).toEqual({ top: 12, right: 16 });
+				mapview.compassPosition = { left: 20, bottom: 24 };
+				expect(mapview.compassPosition).toEqual({ left: 20, bottom: 24 });
+				mapview.compassPosition = null;
+				expect(mapview.compassPosition).toBeNull();
+			});
+		}
+
 		it('.enableZoomControls is a Boolean', () => {
 			expect(mapview.enableZoomControls).toEqual(true);
 		});
@@ -254,6 +289,17 @@ describe('ti.map.View', () => {
 			expect(mapview.pitchEnabled).toEqual(true);
 		});
 
+		it('.padding is an Object', () => {
+			expect(mapview.padding).toEqual({
+				top: 10,
+				left: 20,
+				bottom: 30,
+				right: 40,
+				animated: false,
+				duration: 300,
+			});
+		});
+
 		it('.rotateEnabled is a Boolean', () => {
 			expect(mapview.rotateEnabled).toEqual(true);
 		});
@@ -284,6 +330,14 @@ describe('ti.map.View', () => {
 
 		it('.userLocation is a Boolean', () => {
 			expect(mapview.userLocation).toEqual(true);
+		});
+
+		it('.userLocationSelectedImage is a String', () => {
+			expect(mapview.userLocationSelectedImage).toEqual('user-avatar.png');
+			mapview.userLocationSelectedImage = 'updated-user-avatar.png';
+			expect(mapview.userLocationSelectedImage).toEqual('updated-user-avatar.png');
+			mapview.userLocationSelectedImage = null;
+			expect(mapview.userLocationSelectedImage).toBeNull();
 		});
 
 		it('.userLocationButton is a Boolean', () => {

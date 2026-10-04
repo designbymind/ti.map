@@ -82,6 +82,20 @@ exports.run = function(UI, Map) {
         },
         {
             hasChild: true,
+            title: 'select user location',
+            run: function() {
+                map.selectUserLocationAnnotation(true);
+            }
+        },
+        {
+            hasChild: true,
+            title: 'desel user location',
+            run: function() {
+                map.deselectUserLocationAnnotation(false);
+            }
+        },
+        {
+            hasChild: true,
             title: 'modify anno2',
             run: function() {
                 anno2.title = 'Hello';
@@ -132,14 +146,39 @@ exports.run = function(UI, Map) {
         subtitle: 'This is anno4',
         draggable: true
     });
+    var featuredAnno = Map.createAnnotation({
+        latitude: -33.85365,
+        longitude: 151.22689,
+        title: 'Featured remote image',
+        image: 'https://picsum.photos/id/1025/300/300',
+        showAsFeaturedMarker: true,
+        markerTitleVisibility: Map.FEATURE_VISIBILITY_VISIBLE,
+        markerSubtitleVisibility: Map.FEATURE_VISIBILITY_ADAPTIVE,
+        featuredMarkerShadow: {
+            enabled: true,
+            color: '#000000',
+            opacity: 0.18,
+            radius: 2.5,
+            offset: { x: 0, y: 1 }
+        },
+        featuredMarkerSelectedShadow: {
+            enabled: true,
+            color: '#000000',
+            opacity: 0.32,
+            radius: 6,
+            offset: { x: 0, y: 3 }
+        },
+        canShowCallout: false
+    });
     Ti.API.info('Latitude:' + anno.latitude);
     Ti.API.info('Title:' + anno.title);
 
     var map = Map.createView({
         userLocation: true,
+        userLocationSelectedImage: 'https://picsum.photos/id/1027/300/300',
         mapType: Map.NORMAL_TYPE,
         animate: true,
-        annotations: [anno, anno2, anno4],
+        annotations: [anno, anno2, anno4, featuredAnno],
         region: {
             latitude: -33.86365,
             longitude: 151.21689,
@@ -150,6 +189,14 @@ exports.run = function(UI, Map) {
     });
 
     Ti.API.info('userLocation: ' + map.userLocation);
+
+    map.addEventListener('userlocationannotationselected', function (event) {
+        Ti.API.info('User-location annotation selected: ' + event.latitude + ', ' + event.longitude);
+    });
+
+    map.addEventListener('userlocationannotationdeselected', function (event) {
+        Ti.API.info('User-location annotation deselected: ' + event.latitude + ', ' + event.longitude);
+    });
 
     map.addEventListener('click', function(e) {
         Ti.API.info('Latitude: ' + e.latitude);

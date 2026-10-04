@@ -35,6 +35,14 @@ describe('ti.map.Annotation', () => {
 			subtitleid: 'subtitleid',
 			showInfoWindow: false,
 			showAsMarker: false,
+			showAsFeaturedMarker: false,
+			featuredMarkerShadow: {
+				enabled: true,
+				opacity: 0.18
+			},
+			featuredMarkerSelectedShadow: {
+				enabled: false
+			},
 			markerTitleVisibility: 0,
 			markerSubtitleVisibility: 0,
 			customView:  Ti.UI.createView({}),
@@ -149,6 +157,19 @@ describe('ti.map.Annotation', () => {
 		expect(annotation.showAsMarker).toEqual(false);
 	});
 
+	it('should have valid showAsFeaturedMarker', () => {
+		expect(annotation.showAsFeaturedMarker).toEqual(false);
+	});
+
+	it('should have valid featuredMarkerShadow', () => {
+		expect(annotation.featuredMarkerShadow.enabled).toEqual(true);
+		expect(annotation.featuredMarkerShadow.opacity).toEqual(0.18);
+	});
+
+	it('should have valid featuredMarkerSelectedShadow', () => {
+		expect(annotation.featuredMarkerSelectedShadow.enabled).toEqual(false);
+	});
+
 	it('should have valid showInfoWindow', () => {
 		expect(annotation.showInfoWindow).toEqual(false);
 	});
@@ -169,4 +190,3 @@ describe('ti.map.Annotation', () => {
 		expect(annotation.titleid).toEqual('titleid');
 	});
 });
-

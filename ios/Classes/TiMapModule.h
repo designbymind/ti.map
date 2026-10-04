@@ -15,7 +15,12 @@
 #endif
   UIColor *colorRed;
   MKLocalSearchCompleter *_searchCompleter;
+  NSMutableDictionary *_resolvedSearches;
 }
+
+- (void)search:(id)args;
+- (void)cancelSearch:(id)args;
+- (void)searchForCompletionResult:(id)args;
 
 @property (nonatomic, readonly) NSNumber *STANDARD_TYPE;
 @property (nonatomic, readonly) NSNumber *NORMAL_TYPE; // For parity with Android
@@ -34,5 +39,9 @@
 @property (nonatomic, readonly) NSNumber *ANNOTATION_DRAG_STATE_DRAG;
 @property (nonatomic, readonly) NSNumber *ANNOTATION_DRAG_STATE_CANCEL;
 @property (nonatomic, readonly) NSNumber *ANNOTATION_DRAG_STATE_END;
+
+@property (nonatomic, readonly) NSNumber *LOOK_AROUND_BADGE_POSITION_TOP_LEADING;
+@property (nonatomic, readonly) NSNumber *LOOK_AROUND_BADGE_POSITION_TOP_TRAILING;
+@property (nonatomic, readonly) NSNumber *LOOK_AROUND_BADGE_POSITION_BOTTOM_TRAILING;
 
 @end
