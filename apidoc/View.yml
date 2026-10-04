@@ -110,6 +110,20 @@ methods:
         summary: Annotation to deselect, identified by an annotation title or a <Modules.Map.Annotation> reference.
         type: [String,Modules.Map.Annotation]
 
+  - name: deselectUserLocationAnnotation
+    summary: Deselects the native user-location annotation.
+    description: |
+        This method has no effect until user location is enabled and its annotation is visible.
+        A successful state change fires the
+        <Modules.Map.View.userlocationannotationdeselected> event.
+    parameters:
+      - name: animated
+        summary: Whether MapKit should animate the deselection. Defaults to `true`.
+        type: Boolean
+        optional: true
+    exclude-platforms: [android, macos]
+    since: { iphone: "7.4.8", ipad: "7.4.8" }
+
   - name: removeAllAnnotations
     summary: Removes all annotations from the map.
 
@@ -143,6 +157,20 @@ methods:
       - name: annotation
         summary: Annotation to show, identified by an annotation title or a <Modules.Map.Annotation> reference.
         type: [String, Modules.Map.Annotation]
+
+  - name: selectUserLocationAnnotation
+    summary: Selects the native user-location annotation.
+    description: |
+        This method has no effect until user location is enabled and its annotation is visible.
+        A successful state change fires the
+        <Modules.Map.View.userlocationannotationselected> event.
+    parameters:
+      - name: animated
+        summary: Whether MapKit should animate the selection. Defaults to `true`.
+        type: Boolean
+        optional: true
+    exclude-platforms: [android, macos]
+    since: { iphone: "7.4.8", ipad: "7.4.8" }
 
   - name: setMapType
     summary: Sets the type of map (satellite, normal, or terrain).
@@ -191,6 +219,26 @@ methods:
         summary: Relative zoom level (positive to zoom in, negative to zoom out).
         type: Number
     since: "3.1.0"
+
+  - name: zoomBy
+    summary: Smoothly zooms by a relative number of levels using an accumulated native target.
+    description: |
+        Rapid calls update one destination instead of starting competing animations. Positive levels
+        zoom in and negative levels zoom out. One level changes camera distance by a factor of two.
+        This method shares its zoom state with <Modules.Map.ZoomControl>.
+    parameters:
+      - name: options
+        type: ZoomByOptions
+    platforms: [iphone, ipad]
+    since: "7.4.11"
+
+  - name: zoomTo
+    summary: Changes the camera to an absolute center-coordinate distance.
+    parameters:
+      - name: options
+        type: ZoomToOptions
+    platforms: [iphone, ipad]
+    since: "7.4.11"
 
   - name: snapshot
     summary: Takes a snapshot of the map
@@ -350,6 +398,82 @@ methods:
     since: { android: "7.4.0", iphone: "6.3.0", ipad: "6.3.0", macos: "9.2.0" }
 
 events:
+  - name: zoomstart
+    summary: Fired when a native accumulated or interactive zoom begins.
+    properties:
+      - name: distance
+        type: Number
+      - name: interactive
+        type: Boolean
+    platforms: [iphone, ipad]
+    since: "7.4.11"
+
+  - name: zoomchange
+    summary: Fired while a native accumulated or interactive zoom changes the camera distance.
+    properties:
+      - name: distance
+        type: Number
+      - name: interactive
+        type: Boolean
+    platforms: [iphone, ipad]
+    since: "7.4.11"
+
+  - name: zoomend
+    summary: Fired when a native accumulated or interactive zoom ends or is interrupted by a map gesture.
+    properties:
+      - name: distance
+        type: Number
+      - name: interactive
+        type: Boolean
+    platforms: [iphone, ipad]
+    since: "7.4.11"
+
+  - name: userlocationannotationselected
+    summary: Fired when the native user-location annotation is selected.
+    description: |
+        This event is fired when MapKit changes the user-location indicator to its selected state,
+        either after a user tap or a call to <Modules.Map.View.selectUserLocationAnnotation>.
+        It is independent of <Modules.Map.View.userLocationSelectedImage>.
+        Tapping an already-selected user-location annotation does not fire another selection event
+        until the annotation has first been deselected.
+    properties:
+      - name: map
+        summary: The map view instance.
+        type: Modules.Map.View
+
+      - name: latitude
+        summary: Latitude of the user's location when the annotation was selected.
+        type: Number
+
+      - name: longitude
+        summary: Longitude of the user's location when the annotation was selected.
+        type: Number
+    exclude-platforms: [android, macos]
+    since: { iphone: "7.4.8", ipad: "7.4.8" }
+
+  - name: userlocationannotationdeselected
+    summary: Fired when the native user-location annotation is deselected.
+    description: |
+        This event is fired when MapKit changes the user-location annotation from its selected
+        state back to the normal user-location indicator, such as when the user taps elsewhere
+        on the map, selects another annotation, or calls
+        <Modules.Map.View.deselectUserLocationAnnotation>. It is independent of
+        <Modules.Map.View.userLocationSelectedImage>.
+    properties:
+      - name: map
+        summary: The map view instance.
+        type: Modules.Map.View
+
+      - name: latitude
+        summary: Latitude of the user's location when the annotation was deselected.
+        type: Number
+
+      - name: longitude
+        summary: Longitude of the user's location when the annotation was deselected.
+        type: Number
+    exclude-platforms: [android, macos]
+    since: { iphone: "7.4.8", ipad: "7.4.8" }
+
   - name: clusterstart
     summary: Fired when a collision between annotations occures.
     properties:
@@ -613,6 +737,22 @@ properties:
     type: Boolean
     default: false
 
+  - name: userLocationSelectedImage
+    summary: Replaces the generic silhouette inside the selected iOS user-location balloon.
+    description: |
+        When set, the image is displayed only after the user taps the native blue user-location
+        indicator. The system blue dot, selected balloon, and MapKit selection animations remain
+        native. If this property is omitted, Ti.Map preserves the unmodified system appearance.
+
+        Local image paths, `Titanium.Blob` objects, and remote HTTP or HTTPS image URLs are supported.
+        This property may be changed after the map is created. Set it to `null` to restore MapKit's
+        generic silhouette. While a new remote image is loading, the previous image remains visible;
+        if the load fails, the previous image or generic silhouette is retained.
+    type: [String, Titanium.Blob]
+    exclude-platforms: [android, macos]
+    osver: { ios: {min: "14.0"} }
+    since: { iphone: "7.4.8", ipad: "7.4.8" }
+
   - name: annotations
     summary: An array of annotations to add to the map.
     description: |
@@ -657,9 +797,29 @@ properties:
     type: MapRegionTypev2
     default: latitude 0, longitude 0
 
+  - name: selectableMapFeatures
+    summary: Native Apple Maps feature types that users can select.
+    description: |
+        Assign an array containing any combination of
+        <Modules.Map.FEATURE_POINT_OF_INTEREST>,
+        <Modules.Map.FEATURE_PHYSICAL_FEATURES>, and
+        <Modules.Map.FEATURE_TERRITORIES>. The property can be assigned when creating the map
+        or updated at runtime. Assign an empty array to disable selection of all native map
+        features. Custom Ti.Map annotations are unaffected.
+
+        Selecting enabled native features produces the existing `poiclick` and `poideselect`
+        events.
+    type: Array<Number>
+    default: []
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
+    since: "7.4.12"
+
   - name: padding
     summary: Sets the distance between each edges of the view to the map controls.
-    description: The map view controls may be obscured by other elements.
+    description: |
+        The map view controls may be obscured by other elements. On iOS, padding changes can be
+        animated by including `animated: true` and an optional `duration` in the padding dictionary.
     since: "7.4.0"
     type: MapViewPadding
 
@@ -690,6 +850,21 @@ properties:
     default: true
     since: { android: "3.2.3", iphone: "6.1.0", ipad: "6.1.0", macos: "9.2.0" }
     osver: { ios: {min: "9.0"} }
+
+  - name: compassPosition
+    summary: Positions the native iOS compass within the map view.
+    description: |
+        Setting this property replaces MapKit's automatically positioned compass with a native
+        `MKCompassButton` using the supplied edge offsets. The compass retains its native appearance,
+        adaptive visibility, and tap-to-reset behavior. The `top` value takes precedence over `bottom`,
+        and `left` takes precedence over `right`. Omitted vertical and horizontal offsets default to
+        `top: 8` and `right: 8`. Set this property to `null` to restore MapKit's automatic placement.
+
+        The <Modules.Map.View.compassEnabled> property continues to show or hide the compass.
+    type: MapCompassPosition
+    exclude-platforms: [android, macos]
+    osver: { ios: {min: "11.0"} }
+    since: { iphone: "7.4.9", ipad: "7.4.9" }
 
   - name: mapToolbarEnabled
     summary: Enable or disables the map toolbar.
@@ -776,6 +951,13 @@ properties:
         which yields a camera looking straight down onto the map surface.
     type: Modules.Map.Camera
     since: { android: "9.1.0", iphone: "3.2.0", ipad: "3.2.0", macos: "9.2.0" }
+
+  - name: cameraDistance
+    summary: Current distance in meters between the camera and the map center.
+    type: Number
+    permission: read-only
+    platforms: [iphone, ipad]
+    since: "7.4.11"
 
   - name: pitchEnabled
     summary: A Boolean value indicating whether the map camera's pitch information is used.
@@ -895,6 +1077,27 @@ properties:
     platforms: [android]
 
 ---
+name: MapCompassPosition
+summary: Edge offsets used to position the native iOS compass.
+properties:
+  - name: top
+    summary: Distance from the top edge of the map view.
+    type: Number
+    optional: true
+  - name: left
+    summary: Distance from the left edge of the map view.
+    type: Number
+    optional: true
+  - name: bottom
+    summary: Distance from the bottom edge of the map view.
+    type: Number
+    optional: true
+  - name: right
+    summary: Distance from the right edge of the map view.
+    type: Number
+    optional: true
+
+---
 name: MapViewPadding
 summary: The padding applied to the map view using <Modules.Map.View.padding>.
 properties:
@@ -910,6 +1113,18 @@ properties:
   - name: right
     summary: Right padding of the map view.
     type: Number
+  - name: animated
+    summary: Whether to animate the padding change on iOS.
+    type: Boolean
+    default: false
+    exclude-platforms: [android, macos]
+    since: { iphone: "7.4.9", ipad: "7.4.9" }
+  - name: duration
+    summary: Duration of the iOS padding animation, in milliseconds.
+    type: Number
+    default: 300
+    exclude-platforms: [android, macos]
+    since: { iphone: "7.4.9", ipad: "7.4.9" }
 
 ---
 name: MapRegionTypev2
@@ -1012,6 +1227,54 @@ properties:
         or <Titanium.UI.ANIMATION_CURVE_LINEAR>.
     type: Number
 since: "3.2.0"
+
+---
+name: ZoomByOptions
+summary: Options for an accumulated relative camera zoom.
+properties:
+  - name: level
+    summary: Relative levels to zoom. Positive zooms in and negative zooms out.
+    type: Number
+  - name: duration
+    summary: Animation duration in milliseconds. Subsequent calls retarget the active animation.
+    type: Number
+    default: 240
+    optional: true
+  - name: minimumDistance
+    summary: Closest permitted camera distance in meters.
+    type: Number
+    default: 40
+    optional: true
+  - name: maximumDistance
+    summary: Farthest permitted camera distance in meters.
+    type: Number
+    default: 40000000
+    optional: true
+
+---
+name: ZoomToOptions
+summary: Options for an absolute camera-distance zoom.
+properties:
+  - name: distance
+    summary: Destination camera distance in meters.
+    type: Number
+  - name: animated
+    type: Boolean
+    default: true
+    optional: true
+  - name: duration
+    summary: Animation duration in milliseconds.
+    type: Number
+    default: 240
+    optional: true
+  - name: minimumDistance
+    type: Number
+    default: 40
+    optional: true
+  - name: maximumDistance
+    type: Number
+    default: 40000000
+    optional: true
 
 ---
 name: ClusterAnnotationParams

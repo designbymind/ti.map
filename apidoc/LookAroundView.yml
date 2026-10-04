@@ -1,0 +1,362 @@
+---
+name: Modules.Map.LookAroundView
+summary: Displays an interactive Apple Look Around preview for a coordinate.
+description: |
+    The view requests a Look Around scene when its coordinate is set. It remains transparent
+    while loading and when imagery is unavailable. Listen for <Modules.Map.LookAroundView.lookaroundload>
+    before revealing UI that depends on the preview.
+
+    Tapping an available preview uses MapKit's native transition into the full-screen interactive
+    Look Around experience.
+extends: Titanium.UI.View
+platforms: [iphone, ipad]
+osver: {ios: {min: "16.0"}}
+since: "7.4.10"
+
+properties:
+  - name: available
+    summary: Whether a Look Around scene is currently loaded.
+    type: Boolean
+    permission: read-only
+
+  - name: loading
+    summary: Whether a scene request is currently loading.
+    type: Boolean
+    permission: read-only
+
+  - name: coordinate
+    summary: Coordinate for which to display Look Around imagery.
+    description: Use this property or set both <Modules.Map.LookAroundView.latitude> and <Modules.Map.LookAroundView.longitude>.
+    type: MapPointType
+
+  - name: latitude
+    summary: Latitude used with <Modules.Map.LookAroundView.longitude> to request a scene.
+    type: Number
+
+  - name: longitude
+    summary: Longitude used with <Modules.Map.LookAroundView.latitude> to request a scene.
+    type: Number
+
+  - name: navigationEnabled
+    summary: Whether the user can navigate through the Look Around scene.
+    type: Boolean
+    default: true
+
+  - name: showsRoadLabels
+    summary: Whether road labels are displayed in the Look Around scene.
+    type: Boolean
+    default: true
+
+  - name: pointOfInterestFilter
+    summary: Controls which point-of-interest labels are displayed by the interactive viewer.
+    description: |
+        A Boolean includes or excludes all categories. An array includes the supplied MapKit
+        category strings. A <LookAroundPointOfInterestFilter> can include or exclude categories.
+        The `pointOfInterestCategory` returned by Ti.Map place and POI results can be used as a
+        category value.
+    type: [Boolean, Array<String>, LookAroundPointOfInterestFilter]
+
+  - name: badgePosition
+    summary: Position of Apple's Look Around badge within the preview.
+    description: |
+        Use one of the `LOOK_AROUND_BADGE_POSITION_*` constants from <Modules.Map>.
+    type: Number
+    default: Modules.Map.LOOK_AROUND_BADGE_POSITION_TOP_LEADING
+
+  - name: snapshotSize
+    summary: Default width and height used by <Modules.Map.LookAroundView.takeSnapshot>.
+    type: LookAroundSnapshotSize
+
+  - name: snapshotScale
+    summary: Default display scale used when creating snapshots.
+    type: Number
+
+  - name: snapshotInterfaceStyle
+    summary: Default appearance used when creating snapshots.
+    description: Accepts `system`, `unspecified`, `light`, or `dark`.
+    type: String
+    default: system
+
+  - name: snapshotPointOfInterestFilter
+    summary: Point-of-interest filter used for snapshots.
+    description: Defaults to <Modules.Map.LookAroundView.pointOfInterestFilter> when unset.
+    type: [Boolean, Array<String>, LookAroundPointOfInterestFilter]
+
+methods:
+  - name: cancel
+    summary: Cancels active scene and snapshot requests.
+
+  - name: reload
+    summary: Requests the current coordinate again.
+
+  - name: takeSnapshot
+    summary: Creates a static image from the currently loaded Look Around scene.
+    parameters:
+      - name: options
+        summary: Snapshot options and callbacks.
+        type: LookAroundSnapshotOptions
+        optional: true
+
+events:
+  - name: lookaroundloadstart
+    summary: Fired when the view begins requesting a scene.
+    properties:
+      - name: available
+        type: Boolean
+      - name: coordinate
+        type: MapPointType
+
+  - name: lookaroundload
+    summary: Fired after an available scene is loaded and displayed.
+    properties:
+      - name: available
+        type: Boolean
+      - name: coordinate
+        type: MapPointType
+
+  - name: lookaroundunavailable
+    summary: Fired when MapKit reports that no imagery is available for the coordinate.
+    properties:
+      - name: available
+        type: Boolean
+      - name: coordinate
+        type: MapPointType
+
+  - name: lookarounderror
+    summary: Fired when a scene request fails or an invalid coordinate is supplied.
+    properties:
+      - name: error
+        type: String
+      - name: code
+        type: Number
+        optional: true
+      - name: coordinate
+        type: MapPointType
+        optional: true
+
+  - name: lookaroundwillupdatescene
+    summary: Fired before navigation changes the displayed Look Around scene.
+
+  - name: lookaroundsceneupdated
+    summary: Fired after navigation changes the displayed Look Around scene.
+
+  - name: lookaroundwillopen
+    summary: Fired before the preview enters full-screen mode.
+
+  - name: lookaroundopen
+    summary: Fired after the preview enters full-screen mode.
+
+  - name: lookaroundwillclose
+    summary: Fired before the full-screen Look Around experience closes.
+
+  - name: lookaroundclose
+    summary: Fired after the full-screen Look Around experience closes.
+
+examples:
+  - title: Embedded Look Around preview
+    example: |
+        ``` javascript
+        const Map = require('ti.map');
+
+        const preview = Map.createLookAroundView({
+            width: 190,
+            height: 125,
+            borderRadius: 12,
+            coordinate: {
+                latitude: 37.7955,
+                longitude: -122.3937
+            },
+            navigationEnabled: true,
+            showsRoadLabels: true,
+            badgePosition: Map.LOOK_AROUND_BADGE_POSITION_TOP_LEADING,
+            opacity: 0
+        });
+
+        preview.addEventListener('lookaroundload', function () {
+            preview.animate({ opacity: 1, duration: 180 });
+        });
+
+        preview.addEventListener('lookaroundunavailable', function () {
+            preview.opacity = 0;
+        });
+        ```
+
+---
+name: LookAroundPointOfInterestFilter
+summary: Dictionary controlling the point-of-interest categories displayed by Look Around.
+properties:
+  - name: includedCategories
+    summary: MapKit category strings to include.
+    type: Array<String>
+    optional: true
+  - name: excludedCategories
+    summary: MapKit category strings to exclude.
+    type: Array<String>
+    optional: true
+  - name: mode
+    summary: Convenience mode accepting `all` or `none`.
+    type: String
+    optional: true
+
+---
+name: LookAroundSnapshotSize
+summary: Dimensions for a Look Around snapshot, limited to 4096 points per edge.
+properties:
+  - name: width
+    type: Number
+  - name: height
+    type: Number
+
+---
+name: LookAroundSnapshotOptions
+summary: Options and callbacks used to create a Look Around snapshot.
+properties:
+  - name: size
+    type: LookAroundSnapshotSize
+    optional: true
+  - name: scale
+    type: Number
+    optional: true
+  - name: interfaceStyle
+    summary: Accepts `system`, `unspecified`, `light`, or `dark`.
+    type: String
+    optional: true
+  - name: pointOfInterestFilter
+    type: [Boolean, Array<String>, LookAroundPointOfInterestFilter]
+    optional: true
+  - name: callback
+    type: Callback<LookAroundSnapshotResult>
+    optional: true
+  - name: success
+    type: Callback<LookAroundSnapshotResult>
+    optional: true
+  - name: error
+    type: Callback<LookAroundResult>
+    optional: true
+
+---
+name: LookAroundResult
+summary: Result of a Look Around availability, scene, or snapshot operation.
+properties:
+  - name: success
+    type: Boolean
+  - name: available
+    type: Boolean
+  - name: coordinate
+    type: MapPointType
+    optional: true
+  - name: error
+    type: String
+    optional: true
+  - name: code
+    type: Number
+    optional: true
+
+---
+name: LookAroundSnapshotResult
+summary: Successful Look Around snapshot result.
+properties:
+  - name: success
+    type: Boolean
+  - name: available
+    type: Boolean
+  - name: coordinate
+    type: MapPointType
+  - name: error
+    type: String
+    optional: true
+  - name: code
+    type: Number
+    optional: true
+  - name: image
+    type: Titanium.Blob
+    optional: true
+
+---
+name: LookAroundRequestOptions
+summary: Options used to check Look Around coverage.
+properties:
+  - name: latitude
+    summary: Required with `longitude` when `coordinate` is not supplied.
+    type: Number
+    optional: true
+  - name: longitude
+    summary: Required with `latitude` when `coordinate` is not supplied.
+    type: Number
+    optional: true
+  - name: coordinate
+    summary: Alternative to passing latitude and longitude at the top level.
+    type: MapPointType
+    optional: true
+  - name: callback
+    type: Callback<LookAroundResult>
+
+---
+name: LookAroundImageRequestOptions
+summary: Options used to create a static Look Around image.
+properties:
+  - name: latitude
+    summary: Required with `longitude` when `coordinate` is not supplied.
+    type: Number
+    optional: true
+  - name: longitude
+    summary: Required with `latitude` when `coordinate` is not supplied.
+    type: Number
+    optional: true
+  - name: coordinate
+    summary: Alternative to passing latitude and longitude at the top level.
+    type: MapPointType
+    optional: true
+  - name: size
+    type: LookAroundSnapshotSize
+    optional: true
+  - name: scale
+    type: Number
+    optional: true
+  - name: interfaceStyle
+    summary: Accepts `system`, `unspecified`, `light`, or `dark`.
+    type: String
+    optional: true
+  - name: pointOfInterestFilter
+    type: [Boolean, Array<String>, LookAroundPointOfInterestFilter]
+    optional: true
+  - name: callback
+    type: Callback<LookAroundSnapshotResult>
+
+---
+name: LookAroundDialogOptions
+summary: Options used to open a modal Look Around viewer.
+properties:
+  - name: latitude
+    summary: Required with `longitude` when `coordinate` is not supplied.
+    type: Number
+    optional: true
+  - name: longitude
+    summary: Required with `latitude` when `coordinate` is not supplied.
+    type: Number
+    optional: true
+  - name: coordinate
+    summary: Alternative to passing latitude and longitude at the top level.
+    type: MapPointType
+    optional: true
+  - name: navigationEnabled
+    type: Boolean
+    default: true
+    optional: true
+  - name: showsRoadLabels
+    type: Boolean
+    default: true
+    optional: true
+  - name: pointOfInterestFilter
+    type: [Boolean, Array<String>, LookAroundPointOfInterestFilter]
+    optional: true
+  - name: badgePosition
+    type: Number
+    optional: true
+  - name: animated
+    type: Boolean
+    default: true
+    optional: true
+  - name: callback
+    type: Callback<LookAroundResult>
+    optional: true

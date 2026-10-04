@@ -8,3 +8,9 @@
 #else
 #define IS_SDK_IOS_16 false
 #endif
+
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 180000
+#define IS_SDK_IOS_18 true
+#else
+#define IS_SDK_IOS_18 false
+#endif

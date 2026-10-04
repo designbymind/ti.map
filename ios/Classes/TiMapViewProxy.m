@@ -5,6 +5,7 @@
  * Please see the LICENSE included with this distribution for details.
  */
 #import "TiMapViewProxy.h"
+#import "TiCutoutCircle.h"
 #import "TiMapAnnotationProxy.h"
 #import "TiMapCircleProxy.h"
 #import "TiMapImageOverlayProxy.h"
@@ -21,10 +22,10 @@
 - (NSArray *)keySequence
 {
   return [NSArray arrayWithObjects:
-                      @"animate",
-                  @"location",
-                  @"regionFit",
-                  nil];
+          @"animate",
+      @"location",
+      @"regionFit",
+      nil];
 }
 
 - (void)_destroy
@@ -233,6 +234,30 @@
   }
 }
 
+- (void)selectUserLocationAnnotation:(id)arg
+{
+  ENSURE_SINGLE_ARG_OR_NIL(arg, NSNumber);
+  if ([self viewAttached]) {
+    TiThreadPerformOnMainThread(
+        ^{
+          [(TiMapView *)[self view] selectUserLocationAnnotation:arg];
+        },
+        NO);
+  }
+}
+
+- (void)deselectUserLocationAnnotation:(id)arg
+{
+  ENSURE_SINGLE_ARG_OR_NIL(arg, NSNumber);
+  if ([self viewAttached]) {
+    TiThreadPerformOnMainThread(
+        ^{
+          [(TiMapView *)[self view] deselectUserLocationAnnotation:arg];
+        },
+        NO);
+  }
+}
+
 - (void)setLocation:(id)args
 {
   if ([self viewAttached]) {
@@ -287,6 +312,55 @@
   } else {
     for (id annotation in newAnnotations) {
       [self addAnnotation:annotation];
+    }
+  }
+}
+
+- (void)addCutoutCircle:(id)arg
+{
+  ENSURE_SINGLE_ARG(arg, NSDictionary);
+
+  [self replaceValue:arg forKey:@"cutoutCircle" notification:NO];
+
+  CGFloat latitude = [TiUtils floatValue:@"latitude" properties:arg];
+  CGFloat longitude = [TiUtils floatValue:@"longitude" properties:arg];
+  CGFloat radius = [TiUtils doubleValue:@"radius" properties:arg];
+  double tolerance = [TiUtils doubleValue:@"tolerance" properties:arg def:3.0];
+
+  CLLocationCoordinate2D WORLD_COORDINATES[6];
+  WORLD_COORDINATES[0] = CLLocationCoordinate2DMake(90, 0);
+  WORLD_COORDINATES[1] = CLLocationCoordinate2DMake(90, 180);
+  WORLD_COORDINATES[2] = CLLocationCoordinate2DMake(-90, 180);
+  WORLD_COORDINATES[3] = CLLocationCoordinate2DMake(-90, 0);
+  WORLD_COORDINATES[4] = CLLocationCoordinate2DMake(-90, -180);
+  WORLD_COORDINATES[5] = CLLocationCoordinate2DMake(90, -180);
+
+  CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude, longitude);
+  NSArray<NSDictionary *> *circleCoordinates = [TiMapUtils generateCircleCoordinates:coordinate
+                                                                          withRadius:radius
+                                                                        andTolerance:tolerance];
+
+  CLLocationCoordinate2D *circleCoordinatesNative = malloc(sizeof(CLLocationCoordinate2D) * [circleCoordinates count]);
+
+  for (NSUInteger i = 0; i < [circleCoordinates count]; ++i) {
+    CLLocationCoordinate2D coordinate = [TiMapUtils processLocation:[circleCoordinates objectAtIndex:i]];
+    circleCoordinatesNative[i] = coordinate;
+  }
+
+  MKPolygon *circlePolygon = [MKPolygon polygonWithCoordinates:circleCoordinatesNative count:circleCoordinates.count];
+  TiCutoutCircle *cutoutPolygon = [TiCutoutCircle polygonWithCoordinates:WORLD_COORDINATES count:6 interiorPolygons:@[ circlePolygon ]];
+
+  [[(TiMapView *)[self view] map] addOverlay:cutoutPolygon];
+}
+
+- (void)removeCutoutCircle:(id)unused
+{
+  MKMapView *mapView = [(TiMapView *)[self view] map];
+  NSArray<id<MKOverlay>> *overlays = [mapView overlays];
+
+  for (id<MKOverlay> overlay in overlays) {
+    if ([overlay isKindOfClass:[TiCutoutCircle class]]) {
+      [mapView removeOverlay:overlay];
     }
   }
 }
@@ -439,11 +513,15 @@
 
 - (void)removeAllGeoJSON:(id)unused
 {
-  TiThreadPerformOnMainThread(
-      ^{
-        [(TiMapView *)[self view] removeAllGeoJSON:unused];
-      },
-      NO);
+  NSLog(@"[ERROR] removeAllGeoJSON :: TiMapViewProxy.m");
+
+  if ([self viewAttached]) {
+    TiThreadPerformOnMainThread(
+        ^{
+          [(TiMapView *)[self view] removeAllGeoJSON:unused];
+        },
+        NO);
+  }
 }
 
 - (void)addRoute:(id)arg
@@ -911,6 +989,36 @@
   TiThreadPerformOnMainThread(
       ^{
         [(TiMapView *)[self view] animateCamera:args];
+      },
+      NO);
+}
+
+- (NSNumber *)cameraDistance
+{
+  if (![self viewAttached]) {
+    return @(0);
+  }
+  return [TiMapUtils returnValueOnMainThread:^id {
+    return @([(TiMapView *)[self view] cameraDistance]);
+  }];
+}
+
+- (void)zoomBy:(id)args
+{
+  ENSURE_SINGLE_ARG(args, NSObject);
+  TiThreadPerformOnMainThread(
+      ^{
+        [(TiMapView *)[self view] zoomBy:args];
+      },
+      NO);
+}
+
+- (void)zoomTo:(id)args
+{
+  ENSURE_SINGLE_ARG(args, NSDictionary);
+  TiThreadPerformOnMainThread(
+      ^{
+        [(TiMapView *)[self view] zoomTo:args];
       },
       NO);
 }

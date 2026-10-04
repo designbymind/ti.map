@@ -435,6 +435,30 @@ properties:
     exclude-platforms: [android]
     since: "6.3.0"
 
+  - name: FEATURE_POINT_OF_INTEREST
+    summary: Makes native points of interest such as restaurants, parks, and schools selectable.
+    type: Number
+    permission: read-only
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
+    since: "7.4.12"
+
+  - name: FEATURE_PHYSICAL_FEATURES
+    summary: Makes native physical features such as mountains, rivers, and oceans selectable.
+    type: Number
+    permission: read-only
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
+    since: "7.4.12"
+
+  - name: FEATURE_TERRITORIES
+    summary: Makes native territorial features such as borders and neighborhoods selectable.
+    type: Number
+    permission: read-only
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
+    since: "7.4.12"
+
   - name: ANNOTATION_VIEW_COLLISION_MODE_RECTANGLE
     summary: |
         Constant indicating that the full collision frame rectangle should be used for
@@ -455,6 +479,30 @@ properties:
     exclude-platforms: [android]
     since: "6.3.0"
 
+  - name: LOOK_AROUND_BADGE_POSITION_TOP_LEADING
+    summary: Places the Apple Look Around badge at the top leading edge of the preview.
+    type: Number
+    permission: read-only
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
+    since: "7.4.10"
+
+  - name: LOOK_AROUND_BADGE_POSITION_TOP_TRAILING
+    summary: Places the Apple Look Around badge at the top trailing edge of the preview.
+    type: Number
+    permission: read-only
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
+    since: "7.4.10"
+
+  - name: LOOK_AROUND_BADGE_POSITION_BOTTOM_TRAILING
+    summary: Places the Apple Look Around badge at the bottom trailing edge of the preview.
+    type: Number
+    permission: read-only
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
+    since: "7.4.10"
+
 methods:
   - name: isGooglePlayServicesAvailable
     returns:
@@ -467,6 +515,114 @@ methods:
     summary: Returns a code to indicate whether Google Play Services is available on the device.
     since: "3.1.1"
     platforms: [android]
+
+  - name: createLookAroundView
+    summary: Creates an embeddable native Apple Look Around preview.
+    parameters:
+      - name: properties
+        summary: Properties applied to the Look Around view.
+        type: Object
+        optional: true
+    returns:
+      type: Modules.Map.LookAroundView
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
+    since: "7.4.10"
+
+  - name: createZoomControl
+    summary: Creates a native, display-synchronized map zoom control.
+    parameters:
+      - name: properties
+        summary: Properties applied to the zoom control. The `mapView` property is required.
+        type: Object
+    returns:
+      type: Modules.Map.ZoomControl
+    platforms: [iphone, ipad]
+    since: "7.4.11"
+
+  - name: isLookAroundAvailable
+    summary: Checks whether Look Around imagery is available at a coordinate.
+    parameters:
+      - name: options
+        type: LookAroundRequestOptions
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
+    since: "7.4.10"
+
+  - name: getLookAroundImage
+    summary: Creates a static Look Around image for a coordinate.
+    description: |
+        Returns `available: false` without an image when the location has no Look Around coverage.
+    parameters:
+      - name: options
+        type: LookAroundImageRequestOptions
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
+    since: "7.4.10"
+
+  - name: openLookAroundDialog
+    summary: Opens an interactive Look Around scene in a native modal controller.
+    parameters:
+      - name: options
+        type: LookAroundDialogOptions
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
+    since: "7.4.10"
+
+  - name: search
+    summary: Searches for place suggestions or resolved places matching a query.
+    description: |
+        Uses `MKLocalSearchCompleter` on iOS. Results are delivered through the
+        `didUpdateResults` event by default.
+
+        Since 7.5.0, set `mode: 'resolved'` to use one `MKLocalSearch` request and
+        return actual places through `callback`. This mode requires a nonempty
+        `requestId`; reusing that ID cancels its previous request. Different IDs
+        can run independently. Resolved searches do not change autocomplete
+        results or emit `didUpdateResults`.
+
+        Debounce input in the application and cancel the request when its screen
+        closes. A cancelled or replaced request does not invoke its callback.
+        Place identifiers are nullable and require iOS 18 or later. Alternate
+        identifiers are useful for matching but are not exhaustive.
+
+        On iOS 18 and later, set `regionPriority` to `required` to exclude
+        results outside the supplied `region`. On earlier iOS versions,
+        MapKit uses its default region-biased behavior.
+    parameters:
+      - name: value
+        summary: Partial place or address text to search for.
+        type: String
+      - name: options
+        summary: Options used to scope and filter the search.
+        type: SearchCompletionOptions
+        optional: true
+    platforms: [iphone, ipad]
+    since: {iphone: "7.2.0", ipad: "7.2.0"}
+
+  - name: cancelSearch
+    summary: Cancels the resolved search with the supplied requestId.
+    description: |
+        Cancellation is silent and suppresses any late callback. It does not
+        affect other resolved request IDs or the autocomplete completer.
+    parameters:
+      - name: options
+        type: SearchCancellationOptions
+    platforms: [iphone, ipad]
+    since: {iphone: "7.5.0", ipad: "7.5.0"}
+
+  - name: searchForCompletionResult
+    summary: Resolves a result from the most recent autocomplete suggestions.
+    description: |
+        Returns the first map item through the callback, with the fields of
+        `ResolvedSearchResult` and `success: true`. On failure returns
+        `success: false` and `error`. Since 7.5.0, includes alternate identifiers
+        and safely returns a null identifier before iOS 18.
+    parameters:
+      - name: options
+        type: SearchCompletionResultOptions
+    platforms: [iphone, ipad]
+    osver: {ios: {min: "16.0"}}
 
 examples:
 
@@ -656,3 +812,143 @@ properties:
   - name: latitude
     summary: Latitude value of the map point, in decimal degrees.
     type: Number
+
+---
+name: SearchCompletionOptions
+summary: Options used to scope and filter an iOS map search request.
+platforms: [iphone, ipad]
+properties:
+  - name: mode
+    summary: Set to `resolved` for actual places or `autocomplete` for suggestions.
+    type: String
+    default: autocomplete
+    since: {iphone: "7.5.0", ipad: "7.5.0"}
+
+  - name: requestId
+    summary: Nonempty request identifier required by resolved mode.
+    description: Use a separate ID for each independent search owner.
+    type: String
+    since: {iphone: "7.5.0", ipad: "7.5.0"}
+
+  - name: callback
+    summary: Receives the resolved search response; required by resolved mode.
+    type: Callback<ResolvedSearchResponse>
+    since: {iphone: "7.5.0", ipad: "7.5.0"}
+
+  - name: region
+    summary: Geographic region used to scope the search.
+    type: MapRegionTypev2
+
+  - name: regionPriority
+    summary: Determines whether results outside `region` are allowed.
+    description: |
+        Set to `required` to exclude results outside the supplied region, or
+        `default` to let MapKit treat the region as a preference. This option
+        requires iOS 18 or later and defaults to `default`.
+    type: String
+    default: default
+    osver: {ios: {min: "18.0"} }
+    since: {iphone: "7.4.5", ipad: "7.4.5"}
+
+  - name: resultTypes
+    summary: MapKit result types to include.
+    description: |
+        Resolved mode supports `SEARCH_RESULT_TYPE_ADDRESS` and
+        `SEARCH_RESULT_TYPE_POINT_OF_INTEREST`. `SEARCH_RESULT_TYPE_QUERY`
+        is only supported by autocomplete.
+    type: Array<Number>
+    osver: {ios: {min: "13.0"} }
+
+---
+name: SearchCancellationOptions
+summary: Identifies the resolved search request to cancel.
+platforms: [iphone, ipad]
+properties:
+  - name: requestId
+    summary: The nonempty identifier supplied to the resolved search.
+    type: String
+
+---
+name: SearchCompletionResultOptions
+summary: Options for resolving a current autocomplete result.
+platforms: [iphone, ipad]
+properties:
+  - name: index
+    summary: Zero-based index in the most recent autocomplete results.
+    type: Number
+  - name: callback
+    summary: Receives the resolved map item or a failure object.
+    type: Callback<Object>
+
+---
+name: ResolvedSearchResponse
+summary: Callback response from a resolved map search.
+platforms: [iphone, ipad]
+properties:
+  - name: success
+    summary: Whether MapKit completed the search successfully.
+    type: Boolean
+  - name: requestId
+    summary: The identifier supplied to search.
+    type: String
+  - name: results
+    summary: Resolved places in MapKit order; empty on failure.
+    type: Array<ResolvedSearchResult>
+  - name: error
+    summary: Error description, present only on failure.
+    type: String
+  - name: code
+    summary: Native error code, present only on failure.
+    type: Number
+
+---
+name: ResolvedSearchResult
+summary: A resolved MapKit place returned by search.
+platforms: [iphone, ipad]
+properties:
+  - name: identifier
+    summary: Apple Place ID, or null when unavailable or before iOS 18.
+    type: String
+  - name: alternateIdentifiers
+    summary: Other known IDs for this place; empty before iOS 18 and not exhaustive.
+    type: Array<String>
+  - name: name
+    summary: Place name, or null when unavailable.
+    type: String
+  - name: title
+    summary: Place name, or an empty string when unavailable.
+    type: String
+  - name: subtitle
+    summary: Full mailing address, or an empty string when unavailable.
+    type: String
+  - name: address
+    summary: Full mailing address; the same value as subtitle and place.address.
+    type: String
+  - name: place
+    summary: Structured placemark address details.
+    description: |
+        Includes available street (thoroughfare), subThoroughfare, city,
+        subLocality, state, subAdministrativeArea, postalCode, country,
+        countryCode, and the formatted address. When available, postalAddress
+        contains street (including house number and any unit), city, state,
+        postalCode, country, and countryCode from Apple's postal address.
+        No synthetic address is substituted when MapKit omits an address.
+    type: Object
+  - name: latitude
+    summary: Place latitude.
+    type: Number
+  - name: longitude
+    summary: Place longitude.
+    type: Number
+  - name: pointOfInterestCategory
+    summary: MapKit category, or null when unavailable.
+    type: String
+  - name: phoneNumber
+    summary: Place telephone number, or null when unavailable.
+    type: String
+  - name: timeZone
+    summary: Time zone name, or null when unavailable.
+    type: String
+  - name: url
+    summary: Place website URL, or null when unavailable.
+    type: String

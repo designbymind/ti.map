@@ -85,6 +85,65 @@ properties:
     osver: {ios: {min: "11.0"} }
     since: "6.3.0"
 
+  - name: showAsFeaturedMarker
+    summary: Shows the annotation as a native image marker that expands when selected.
+    description: |
+        Set this to `true` and provide the marker artwork with the
+        <Modules.Map.Annotation.image> property. The normal state uses a compact circular image
+        with a thin white rim. Selecting the annotation transitions it into a larger white balloon
+        with a continuous white image rim, tightly rounded geographic tail, anchor dot, shadow, and spring animation. Deselecting it
+        springs back into the compact circular state while keeping the coordinate fixed.
+
+        Local image paths, Titanium blobs, Titanium files, and remote HTTPS image URLs are
+        supported. Remote images are loaded asynchronously through Titanium's shared image loader.
+        Reused annotation views cancel obsolete requests so that a late response cannot replace a
+        newer annotation's image. Remote URLs remain subject to the application's App Transport
+        Security configuration.
+
+        The annotation's <Modules.Map.Annotation.title> and <Modules.Map.Annotation.subtitle>
+        are rendered as native labels below the coordinate anchor. Their behavior is controlled by
+        <Modules.Map.Annotation.markerTitleVisibility> and
+        <Modules.Map.Annotation.markerSubtitleVisibility>. The labels use a bounded, intrinsic-width
+        layout with bold, theme-aware text and a soft drop shadow. Light mode uses dark text with a
+        light shadow; dark mode uses light text with a dark shadow. They render outside the annotation's
+        compact root bounds, so neither the labels nor empty layout space expand MapKit's selectable
+        area. Hit testing remains confined to the compact circle or selected balloon and anchor dot.
+
+        This property takes precedence over <Modules.Map.Annotation.showAsMarker> and is ignored
+        when <Modules.Map.Annotation.customView> is set.
+    type: Boolean
+    default: false
+    exclude-platforms: [android, macos]
+    since: { iphone: "7.4.7", ipad: "7.4.7" }
+
+  - name: featuredMarkerShadow
+    summary: Configures the native shadow of the compact featured marker.
+    description: |
+        Applies only when <Modules.Map.Annotation.showAsFeaturedMarker> is `true`. If this
+        property is not set, the marker uses its native default shadow. Set `enabled` to
+        `false`, or `opacity` to `0`, to completely disable the compact marker shadow.
+
+        Changes made after the annotation is added to a map are applied when its native
+        annotation view is refreshed.
+    type: FeaturedMarkerShadow
+    exclude-platforms: [android, macos]
+    since: { iphone: "7.4.7", ipad: "7.4.7" }
+
+  - name: featuredMarkerSelectedShadow
+    summary: Configures the native shadow of the selected featured marker.
+    description: |
+        Applies to the expanded balloon when <Modules.Map.Annotation.showAsFeaturedMarker>
+        is `true`. If this property is not set, the balloon uses its native default shadow.
+        Set `enabled` to `false`, or `opacity` to `0`, to completely disable the balloon and
+        anchor-dot shadows.
+
+        The anchor dot follows the selected shadow's color, opacity, radius, and offset at
+        a proportion appropriate for its smaller size. Changes made after the annotation is
+        added to a map are applied when its native annotation view is refreshed.
+    type: FeaturedMarkerShadow
+    exclude-platforms: [android, macos]
+    since: { iphone: "7.4.7", ipad: "7.4.7" }
+
   - name: markerGlyphText
     summary: The text to display in the marker balloon.
     description: |
@@ -156,7 +215,8 @@ properties:
   - name: markerTitleVisibility
     summary: The visibility of the title text rendered below the marker balloon.
     description: |
-        Title text is normally displayed below the marker balloon. Use <Modules.Map.FEATURE_VISIBILITY_ADAPTIVE>,
+        Title text is normally displayed below the marker balloon, including annotations using
+        <Modules.Map.Annotation.showAsFeaturedMarker>. Use <Modules.Map.FEATURE_VISIBILITY_ADAPTIVE>,
         <Modules.Map.FEATURE_VISIBILITY_VISIBLE> or <Modules.Map.FEATURE_VISIBILITY_HIDDEN>.
     type: Number
     constants: Modules.Map.FEATURE_VISIBILITY_*
@@ -167,8 +227,9 @@ properties:
   - name: markerSubtitleVisibility
     summary: The visibility of the subtitle text rendered below the marker balloon.
     description: |
-        The subtitle text is hidden when the marker is not selected. The text is shown when the marker 
-        is selected. Use <Modules.Map.FEATURE_VISIBILITY_ADAPTIVE>, <Modules.Map.FEATURE_VISIBILITY_VISIBLE> or <Modules.Map.FEATURE_VISIBILITY_HIDDEN>.
+        The subtitle text is hidden when the marker is not selected. The text is shown when the marker
+        is selected, including annotations using <Modules.Map.Annotation.showAsFeaturedMarker>.
+        Use <Modules.Map.FEATURE_VISIBILITY_ADAPTIVE>, <Modules.Map.FEATURE_VISIBILITY_VISIBLE> or <Modules.Map.FEATURE_VISIBILITY_HIDDEN>.
     type: Number
     constants: Modules.Map.FEATURE_VISIBILITY_*
     exclude-platforms: [android]
@@ -224,6 +285,8 @@ properties:
     summary: Image to use for the the pin.
     description: |
         Must be set during creation. This is ignored if the customView property is set.
+        On iOS and iPadOS, this also supplies the artwork when
+        <Modules.Map.Annotation.showAsFeaturedMarker> is `true`, including remote HTTPS URLs.
     type: [String, Titanium.Blob]
     default: If not specified, a standard map pin image is used.
 
@@ -338,3 +401,34 @@ methods:
           type: Number
     exclude-platforms: [android]
     since: "9.2.0"
+
+---
+name: FeaturedMarkerShadow
+summary: Native shadow configuration for a featured map marker.
+platforms: [iphone, ipad]
+properties:
+  - name: enabled
+    summary: Determines whether Core Animation renders the shadow.
+    description: |
+        When this is `false`, Ti.Map clears all native shadow properties and the shadow path
+        so the marker incurs no shadow-rendering cost.
+    type: Boolean
+    default: true
+
+  - name: color
+    summary: Color of the shadow.
+    type: String
+    default: black
+
+  - name: opacity
+    summary: Opacity of the shadow, clamped between `0` and `1`.
+    description: Setting this to `0` disables native shadow rendering.
+    type: Number
+
+  - name: radius
+    summary: Blur radius of the shadow in points, clamped between `0` and `24`.
+    type: Number
+
+  - name: offset
+    summary: Horizontal and vertical offset of the shadow in points.
+    type: Point

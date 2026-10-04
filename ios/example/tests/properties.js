@@ -1,6 +1,8 @@
 exports.title = 'Properties';
 exports.run = function(UI, Map) {
     var win = UI.createWindow(exports.title);
+    var compassBottomLeft = false;
+    var expandedPadding = false;
 
     var rows = [{
             hasChild: true,
@@ -38,6 +40,29 @@ exports.run = function(UI, Map) {
                 tableView.data[0].rows[e.index].title = rows[e.index].title.split(':')[0] + ': ' + map.showsPointsOfInterest;
             }
         },
+        {
+            hasChild: true,
+            title: 'move compass',
+            run: function() {
+                compassBottomLeft = !compassBottomLeft;
+                map.compassPosition = compassBottomLeft ? { left: 16, bottom: 16 } : { top: 16, right: 16 };
+            }
+        },
+        {
+            hasChild: true,
+            title: 'animate padding',
+            run: function() {
+                expandedPadding = !expandedPadding;
+                map.padding = {
+                    top: expandedPadding ? 100 : 0,
+                    left: expandedPadding ? 40 : 0,
+                    bottom: expandedPadding ? 80 : 0,
+                    right: expandedPadding ? 40 : 0,
+                    animated: true,
+                    duration: 600
+                };
+            }
+        },
     ];
 
     // Table View
@@ -65,6 +90,8 @@ exports.run = function(UI, Map) {
             longitudeDelta: 0.1
         },
         top: '50%',
+        compassEnabled: true,
+        compassPosition: { top: 16, right: 16 },
         pitchEnabled: true,
         rotateEnabled: true,
         showsBuildings: true,

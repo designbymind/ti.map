@@ -14,6 +14,11 @@
 #import <TitaniumKit/TiUIView.h>
 
 @class TiMapAnnotationProxy;
+@class TiMapView;
+
+@protocol TiMapZoomObserver <NSObject>
+- (void)mapView:(TiMapView *)mapView zoomDistanceDidChange:(CLLocationDistance)distance;
+@end
 
 @protocol TiMapAnnotation
 @required
@@ -45,6 +50,30 @@
   // Location manager needed for iOS 8 permissions
   CLLocationManager *locationManager;
   KrollCallback *cameraAnimationCallback;
+
+  // Optional native compass with custom positioning.
+  MKCompassButton *compassButton;
+  BOOL compassPositionConfigured;
+  BOOL compassHasTop;
+  BOOL compassHasLeft;
+  BOOL compassHasBottom;
+  BOOL compassHasRight;
+  CGFloat compassTop;
+  CGFloat compassLeft;
+  CGFloat compassBottom;
+  CGFloat compassRight;
+
+  // Display-synchronized zoom state shared by buttons and zoom controls.
+  CADisplayLink *zoomDisplayLink;
+  NSHashTable *zoomObservers;
+  CLLocationDistance zoomStartDistance;
+  CLLocationDistance zoomTargetDistance;
+  CLLocationDistance zoomMinimumDistance;
+  CLLocationDistance zoomMaximumDistance;
+  CFTimeInterval zoomStartTime;
+  NSTimeInterval zoomDuration;
+  BOOL zoomIsInteractive;
+  BOOL applyingProgrammaticZoom;
 }
 
 @property (nonatomic, readonly) CLLocationDegrees longitudeDelta;
@@ -70,9 +99,20 @@
 - (void)removeAnnotation:(id)args;
 - (void)removeAnnotations:(id)args;
 - (void)removeAllAnnotations:(id)args;
+- (void)removeAllGeoJSON:(id)args;
 - (void)selectAnnotation:(id)args;
 - (void)deselectAnnotation:(id)args;
+- (void)selectUserLocationAnnotation:(id)args;
+- (void)deselectUserLocationAnnotation:(id)args;
 - (void)zoom:(id)args;
+- (void)zoomBy:(id)args;
+- (void)zoomTo:(id)args;
+- (CLLocationDistance)cameraDistance;
+- (void)beginInteractiveZoomWithMinimumDistance:(CLLocationDistance)minimumDistance maximumDistance:(CLLocationDistance)maximumDistance;
+- (void)updateInteractiveZoomToDistance:(CLLocationDistance)distance;
+- (void)endInteractiveZoom;
+- (void)addZoomObserver:(id<TiMapZoomObserver>)observer;
+- (void)removeZoomObserver:(id<TiMapZoomObserver>)observer;
 - (void)addRoute:(id)args;
 - (void)removeRoute:(id)args;
 - (void)addPolygon:(id)args;
