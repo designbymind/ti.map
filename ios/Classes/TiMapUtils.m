@@ -66,16 +66,16 @@
 }
 
 + (MKLocalSearchCompleterResultType)mappedResultTypes:(NSArray<NSNumber *> *)inputResultTypes
- {
-   MKLocalSearchCompleterResultType resultTypes = 0;
+{
+  MKLocalSearchCompleterResultType resultTypes = 0;
 
-   for (NSNumber *number in inputResultTypes) {
-     MKLocalSearchCompleterResultType typeValue = [number unsignedIntegerValue];
-     resultTypes |= typeValue;
-   }
+  for (NSNumber *number in inputResultTypes) {
+    MKLocalSearchCompleterResultType typeValue = [number unsignedIntegerValue];
+    resultTypes |= typeValue;
+  }
 
-   return resultTypes;
- }
+  return resultTypes;
+}
 
 + (NSArray<NSDictionary *> *)generateCircleCoordinates:(CLLocationCoordinate2D)coordinate withRadius:(double)radius andTolerance:(double)tolerance
 {

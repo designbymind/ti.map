@@ -231,9 +231,9 @@ static CGFloat TiMapClampedShadowRadius(CGFloat value)
 }
 
 - (void)setTitle:(NSString *)title
-          subtitle:(NSString *)subtitle
-   titleVisibility:(MKFeatureVisibility)newTitleVisibility
-subtitleVisibility:(MKFeatureVisibility)newSubtitleVisibility
+              subtitle:(NSString *)subtitle
+       titleVisibility:(MKFeatureVisibility)newTitleVisibility
+    subtitleVisibility:(MKFeatureVisibility)newSubtitleVisibility
 {
   titleLabel.text = title;
   subtitleLabel.text = subtitle;

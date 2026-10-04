@@ -37,9 +37,9 @@
 - (void)setImageSource:(id)imageSource proxy:(TiMapAnnotationProxy *)proxy;
 - (void)setMarkerShadow:(id)markerShadow selectedMarkerShadow:(id)selectedMarkerShadow;
 - (void)setTitle:(NSString *)title
-          subtitle:(NSString *)subtitle
-   titleVisibility:(MKFeatureVisibility)titleVisibility
-subtitleVisibility:(MKFeatureVisibility)subtitleVisibility;
+              subtitle:(NSString *)subtitle
+       titleVisibility:(MKFeatureVisibility)titleVisibility
+    subtitleVisibility:(MKFeatureVisibility)subtitleVisibility;
 - (NSString *)lastHitName;
 
 @end

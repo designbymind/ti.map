@@ -5,8 +5,8 @@
  */
 
 #import "TiMapZoomControl.h"
-#import "TiMapZoomControlMath.h"
 #import "TiMapViewProxy.h"
+#import "TiMapZoomControlMath.h"
 #import <TitaniumKit/TiColor.h>
 #import <TitaniumKit/TiUtils.h>
 
@@ -354,7 +354,8 @@ static const CGFloat TiMapZoomActivationMovementTolerance = 10;
                      [self updateThumbGeometry];
                      self->trackView.alpha = self->activeTrackOpacity;
                      self->thumbView.alpha = self->activeThumbOpacity;
-                   } completion:nil];
+                   }
+                   completion:nil];
 }
 
 - (void)showIdleAppearance
@@ -363,27 +364,32 @@ static const CGFloat TiMapZoomActivationMovementTolerance = 10;
     return;
   }
   [UIView animateWithDuration:UIAccessibilityIsReduceMotionEnabled() ? 0 : animationDuration
-                        delay:0
-                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
-                   animations:^{
-                     self->trackView.alpha = self->trackOpacity;
-                     self->thumbView.alpha = self->thumbOpacity;
-                   } completion:^(BOOL finished) {
-                     if (finished && !self->interacting) {
-                       self->holdingThumbPosition = NO;
-                       if (self->thumbOpacity <= 0) {
-                         // The relative gesture position and absolute camera progress can be far
-                         // apart. Hide the fully transparent thumb while rebasing so Core Animation
-                         // cannot present one last visible frame at the new position.
-                         self->thumbView.hidden = YES;
-                         [UIView performWithoutAnimation:^{ [self updateVisualPosition]; }];
-                         self->thumbView.hidden = NO;
-                       } else {
-                         [UIView animateWithDuration:UIAccessibilityIsReduceMotionEnabled() ? 0 : self->animationDuration
-                                          animations:^{ [self updateVisualPosition]; }];
-                       }
-                     }
-                   }];
+      delay:0
+      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
+      animations:^{
+        self->trackView.alpha = self->trackOpacity;
+        self->thumbView.alpha = self->thumbOpacity;
+      }
+      completion:^(BOOL finished) {
+        if (finished && !self->interacting) {
+          self->holdingThumbPosition = NO;
+          if (self->thumbOpacity <= 0) {
+            // The relative gesture position and absolute camera progress can be far
+            // apart. Hide the fully transparent thumb while rebasing so Core Animation
+            // cannot present one last visible frame at the new position.
+            self->thumbView.hidden = YES;
+            [UIView performWithoutAnimation:^{
+              [self updateVisualPosition];
+            }];
+            self->thumbView.hidden = NO;
+          } else {
+            [UIView animateWithDuration:UIAccessibilityIsReduceMotionEnabled() ? 0 : self->animationDuration
+                             animations:^{
+                               [self updateVisualPosition];
+                             }];
+          }
+        }
+      }];
 }
 
 - (CGFloat)progressForTouch:(UITouch *)touch
@@ -532,7 +538,10 @@ static const CGFloat TiMapZoomActivationMovementTolerance = 10;
        usingSpringWithDamping:0.85
         initialSpringVelocity:0
                       options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
-                   animations:^{ [self updateThumbGeometry]; } completion:nil];
+                   animations:^{
+                     [self updateThumbGeometry];
+                   }
+                   completion:nil];
   [self performSelector:@selector(showIdleAppearance) withObject:nil afterDelay:idleDelay];
 }
 
