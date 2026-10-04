@@ -8,6 +8,7 @@ package ti.map;
 
 import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Message;
@@ -324,6 +325,7 @@ public class AnnotationProxy extends KrollProxy
 					markerOptions.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
 					setIconImageDimensions(bitmap.getWidth(), bitmap.getHeight());
 				} catch (Exception e) {
+					Log.e(TAG, e.getMessage());
 				}
 				return;
 			}
@@ -333,8 +335,12 @@ public class AnnotationProxy extends KrollProxy
 		if (image instanceof TiBlob) {
 			Bitmap bitmap = ((TiBlob) image).getImage();
 			if (bitmap != null) {
-				markerOptions.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
-				setIconImageDimensions(bitmap.getWidth(), bitmap.getHeight());
+				try {
+					markerOptions.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+					setIconImageDimensions(bitmap.getWidth(), bitmap.getHeight());
+				} catch (Exception e) {
+					Log.e(TAG, e.getMessage());
+				}
 				return;
 			}
 		}
@@ -439,9 +445,12 @@ public class AnnotationProxy extends KrollProxy
 			TiDimension widthDimension = new TiDimension(defaultIconImageWidth, TiDimension.TYPE_UNDEFINED);
 			TiDimension heightDimension = new TiDimension(defaultIconImageHeight, TiDimension.TYPE_UNDEFINED);
 			// TiDimension needs a view to grab the window manager, so we'll just use the decorview of the current window
-			View view = TiApplication.getAppCurrentActivity().getWindow().getDecorView();
-			iconImageWidth = widthDimension.getAsPixels(view);
-			iconImageHeight = heightDimension.getAsPixels(view);
+			Activity activity = TiApplication.getAppCurrentActivity();
+			if (activity != null) {
+				View view = activity.getWindow().getDecorView();
+				iconImageWidth = widthDimension.getAsPixels(view);
+				iconImageHeight = heightDimension.getAsPixels(view);
+			}
 		}
 	}
 

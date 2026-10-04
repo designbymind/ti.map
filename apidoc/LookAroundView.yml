@@ -102,35 +102,44 @@ events:
     summary: Fired when the view begins requesting a scene.
     properties:
       - name: available
+        summary: Whether Look Around imagery is available at the requested coordinate.
         type: Boolean
       - name: coordinate
+        summary: Coordinate requested for this Look Around operation.
         type: MapPointType
 
   - name: lookaroundload
     summary: Fired after an available scene is loaded and displayed.
     properties:
       - name: available
+        summary: Whether Look Around imagery is available at the requested coordinate.
         type: Boolean
       - name: coordinate
+        summary: Coordinate requested for this Look Around operation.
         type: MapPointType
 
   - name: lookaroundunavailable
     summary: Fired when MapKit reports that no imagery is available for the coordinate.
     properties:
       - name: available
+        summary: Whether Look Around imagery is available at the requested coordinate.
         type: Boolean
       - name: coordinate
+        summary: Coordinate requested for this Look Around operation.
         type: MapPointType
 
   - name: lookarounderror
     summary: Fired when a scene request fails or an invalid coordinate is supplied.
     properties:
       - name: error
+        summary: Error description when the operation fails.
         type: String
       - name: code
+        summary: Native error code when the operation fails.
         type: Number
         optional: true
       - name: coordinate
+        summary: Coordinate requested for this Look Around operation.
         type: MapPointType
         optional: true
 
@@ -203,8 +212,10 @@ name: LookAroundSnapshotSize
 summary: Dimensions for a Look Around snapshot, limited to 4096 points per edge.
 properties:
   - name: width
+    summary: Image width in points.
     type: Number
   - name: height
+    summary: Image height in points.
     type: Number
 
 ---
@@ -212,9 +223,11 @@ name: LookAroundSnapshotOptions
 summary: Options and callbacks used to create a Look Around snapshot.
 properties:
   - name: size
+    summary: Requested snapshot size in points.
     type: LookAroundSnapshotSize
     optional: true
   - name: scale
+    summary: Snapshot image scale.
     type: Number
     optional: true
   - name: interfaceStyle
@@ -222,15 +235,19 @@ properties:
     type: String
     optional: true
   - name: pointOfInterestFilter
+    summary: Categories of points of interest included in the Look Around scene.
     type: [Boolean, Array<String>, LookAroundPointOfInterestFilter]
     optional: true
   - name: callback
+    summary: Receives the result of the Look Around operation.
     type: Callback<LookAroundSnapshotResult>
     optional: true
   - name: success
+    summary: Receives a successful snapshot result.
     type: Callback<LookAroundSnapshotResult>
     optional: true
   - name: error
+    summary: Receives a failure result when the operation fails.
     type: Callback<LookAroundResult>
     optional: true
 
@@ -239,16 +256,21 @@ name: LookAroundResult
 summary: Result of a Look Around availability, scene, or snapshot operation.
 properties:
   - name: success
+    summary: Whether the operation completed successfully.
     type: Boolean
   - name: available
+    summary: Whether Look Around imagery is available at the requested coordinate.
     type: Boolean
   - name: coordinate
+    summary: Coordinate requested for this Look Around operation.
     type: MapPointType
     optional: true
   - name: error
+    summary: Error description when the operation fails.
     type: String
     optional: true
   - name: code
+    summary: Native error code when the operation fails.
     type: Number
     optional: true
 
@@ -257,18 +279,24 @@ name: LookAroundSnapshotResult
 summary: Successful Look Around snapshot result.
 properties:
   - name: success
+    summary: Whether the operation completed successfully.
     type: Boolean
   - name: available
+    summary: Whether Look Around imagery is available at the requested coordinate.
     type: Boolean
   - name: coordinate
+    summary: Coordinate requested for this Look Around operation.
     type: MapPointType
   - name: error
+    summary: Error description when the operation fails.
     type: String
     optional: true
   - name: code
+    summary: Native error code when the operation fails.
     type: Number
     optional: true
   - name: image
+    summary: Snapshot image returned when imagery is available.
     type: Titanium.Blob
     optional: true
 
@@ -289,6 +317,7 @@ properties:
     type: MapPointType
     optional: true
   - name: callback
+    summary: Receives the result of the Look Around operation.
     type: Callback<LookAroundResult>
 
 ---
@@ -308,9 +337,11 @@ properties:
     type: MapPointType
     optional: true
   - name: size
+    summary: Requested snapshot size in points.
     type: LookAroundSnapshotSize
     optional: true
   - name: scale
+    summary: Snapshot image scale.
     type: Number
     optional: true
   - name: interfaceStyle
@@ -318,9 +349,11 @@ properties:
     type: String
     optional: true
   - name: pointOfInterestFilter
+    summary: Categories of points of interest included in the Look Around scene.
     type: [Boolean, Array<String>, LookAroundPointOfInterestFilter]
     optional: true
   - name: callback
+    summary: Receives the result of the Look Around operation.
     type: Callback<LookAroundSnapshotResult>
 
 ---
@@ -340,23 +373,29 @@ properties:
     type: MapPointType
     optional: true
   - name: navigationEnabled
+    summary: Whether users can navigate within the Look Around scene.
     type: Boolean
     default: true
     optional: true
   - name: showsRoadLabels
+    summary: Whether road labels are visible in the scene.
     type: Boolean
     default: true
     optional: true
   - name: pointOfInterestFilter
+    summary: Categories of points of interest included in the Look Around scene.
     type: [Boolean, Array<String>, LookAroundPointOfInterestFilter]
     optional: true
   - name: badgePosition
+    summary: Position of the Apple Look Around badge.
     type: Number
     optional: true
   - name: animated
+    summary: Whether to animate the operation.
     type: Boolean
     default: true
     optional: true
   - name: callback
+    summary: Receives the result of the Look Around operation.
     type: Callback<LookAroundResult>
     optional: true

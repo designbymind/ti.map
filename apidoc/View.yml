@@ -228,6 +228,7 @@ methods:
         This method shares its zoom state with <Modules.Map.ZoomControl>.
     parameters:
       - name: options
+        summary: Options for this operation; see the parameter type for its supported fields.
         type: ZoomByOptions
     platforms: [iphone, ipad]
     since: "7.4.11"
@@ -236,6 +237,7 @@ methods:
     summary: Changes the camera to an absolute center-coordinate distance.
     parameters:
       - name: options
+        summary: Options for this operation; see the parameter type for its supported fields.
         type: ZoomToOptions
     platforms: [iphone, ipad]
     since: "7.4.11"
@@ -402,8 +404,10 @@ events:
     summary: Fired when a native accumulated or interactive zoom begins.
     properties:
       - name: distance
+        summary: Camera distance in meters.
         type: Number
       - name: interactive
+        summary: Whether this zoom change was caused by user interaction.
         type: Boolean
     platforms: [iphone, ipad]
     since: "7.4.11"
@@ -412,8 +416,10 @@ events:
     summary: Fired while a native accumulated or interactive zoom changes the camera distance.
     properties:
       - name: distance
+        summary: Camera distance in meters.
         type: Number
       - name: interactive
+        summary: Whether this zoom change was caused by user interaction.
         type: Boolean
     platforms: [iphone, ipad]
     since: "7.4.11"
@@ -422,8 +428,10 @@ events:
     summary: Fired when a native accumulated or interactive zoom ends or is interrupted by a map gesture.
     properties:
       - name: distance
+        summary: Camera distance in meters.
         type: Number
       - name: interactive
+        summary: Whether this zoom change was caused by user interaction.
         type: Boolean
     platforms: [iphone, ipad]
     since: "7.4.11"
@@ -475,7 +483,7 @@ events:
     since: { iphone: "7.4.8", ipad: "7.4.8" }
 
   - name: clusterstart
-    summary: Fired when a collision between annotations occures.
+    summary: Fired when a collision between annotations occurs.
     properties:
       - name: memberAnnotations
         summary: Array of annotations participating in clustering.
@@ -514,21 +522,21 @@ events:
       - name: newState
         summary: |
             New drag state for the annotation, one of
-            [ANNOTATION_DRAG_STATE_NONE](Titanium.Map.ANNOTATION_DRAG_STATE_NONE),
-            [ANNOTATION_DRAG_STATE_START](Titanium.Map.ANNOTATION_DRAG_STATE_START),
-            [ANNOTATION_DRAG_STATE_DRAG](Titanium.Map.ANNOTATION_DRAG_STATE_DRAG),
-            [ANNOTATION_DRAG_STATE_CANCEL](Titanium.Map.ANNOTATION_DRAG_STATE_CANCEL) or
-            [ANNOTATION_DRAG_STATE_END](Titanium.Map.ANNOTATION_DRAG_STATE_END).
+            [ANNOTATION_DRAG_STATE_NONE](Modules.Map.ANNOTATION_DRAG_STATE_NONE),
+            [ANNOTATION_DRAG_STATE_START](Modules.Map.ANNOTATION_DRAG_STATE_START),
+            [ANNOTATION_DRAG_STATE_DRAG](Modules.Map.ANNOTATION_DRAG_STATE_DRAG),
+            [ANNOTATION_DRAG_STATE_CANCEL](Modules.Map.ANNOTATION_DRAG_STATE_CANCEL) or
+            [ANNOTATION_DRAG_STATE_END](Modules.Map.ANNOTATION_DRAG_STATE_END).
         type: Number
 
       - name: oldState
         summary: |
             Previous drag state for the annotation, one of
-            [ANNOTATION_DRAG_STATE_NONE](Titanium.Map.ANNOTATION_DRAG_STATE_NONE),
-            [ANNOTATION_DRAG_STATE_START](Titanium.Map.ANNOTATION_DRAG_STATE_START),
-            [ANNOTATION_DRAG_STATE_DRAG](Titanium.Map.ANNOTATION_DRAG_STATE_DRAG),
-            [ANNOTATION_DRAG_STATE_CANCEL](Titanium.Map.ANNOTATION_DRAG_STATE_CANCEL) or
-            [ANNOTATION_DRAG_STATE_END](Titanium.Map.ANNOTATION_DRAG_STATE_END).
+            [ANNOTATION_DRAG_STATE_NONE](Modules.Map.ANNOTATION_DRAG_STATE_NONE),
+            [ANNOTATION_DRAG_STATE_START](Modules.Map.ANNOTATION_DRAG_STATE_START),
+            [ANNOTATION_DRAG_STATE_DRAG](Modules.Map.ANNOTATION_DRAG_STATE_DRAG),
+            [ANNOTATION_DRAG_STATE_CANCEL](Modules.Map.ANNOTATION_DRAG_STATE_CANCEL) or
+            [ANNOTATION_DRAG_STATE_END](Modules.Map.ANNOTATION_DRAG_STATE_END).
         type: Number
     since: "3.1.0"
 
@@ -553,7 +561,7 @@ events:
 
         For polygon, polyline or circle, The `click` event includes the following values.
         `clicksource` is a string describing the shape type. `map` is the map view instance.
-        `latitude` and `longtitude` is the corresponding coordinates on the map where the user
+        `latitude` and `longitude` is the corresponding coordinates on the map where the user
         clicked in the shape.
     properties:
       - name: title
@@ -721,11 +729,60 @@ events:
     since: { android: "7.3.0" }
     properties:
       - name: latitude
-        summary: latitude of the point on the ground that was pressed.
+        summary: Latitude of the point on the ground that was pressed.
         type: Number
 
       - name: longitude
-        summary: longitude of the point on the ground that was pressed.
+        summary: Longitude of the point on the ground that was pressed.
+        type: Number
+
+  - name: poideselect
+    summary: Fired when the user deselects a Point of Interest (e.g. restaurant or hotel).
+    since: "7.5.0"
+    platforms: [iphone, ipad, macos]
+
+  - name: poiclick
+    summary: Fired when the user selects a Point of Interest (e.g. restaurant or hotel).
+    description: |
+        Make sure to use the <Modules.Map.View.selectableMapFeatures> property to define
+        annotations tha should be selectable. Available in iOS 16+
+    since: "7.4.0"
+    platforms: [iphone, ipad, macos]
+    properties:
+      - name: name
+        summary: The descriptive name associated with the map item.
+        type: String
+
+      - name: featureType
+        summary: |
+            The type of map feature this annotation represents. See the [Apple docs](https://developer.apple.com/documentation/mapkit/mkmapfeaturetype)
+            for all possible enum values.
+        type: Number
+
+      - name: pointOfInterestCategory
+        summary: |
+            The point-of-interest category for the map item. See the [Apple docs](https://developer.apple.com/documentation/mapkit/mkpointofinterestcategory)
+            for all possible enum values.
+        type: Number
+
+      - name: phoneNumber
+        summary: The phone number associated with a business at the specified location.
+        type: String
+
+      - name: url
+        summary: The URL associated with the specified location.
+        type: String
+
+      - name: place
+        summary: The placemark object containing the location information.
+        type: Object
+
+      - name: latitude
+        summary: Latitude of the annotation that was selected.
+        type: Number
+
+      - name: longitude
+        summary: Longitude of the annotation that was selected.
         type: Number
 
 properties:
@@ -1058,7 +1115,7 @@ properties:
     summary: A Boolean value indicating whether the map can be zoomed by pinching or tapping.
     description: |
         When this property is set to `true` the a map view can be zoomed by pinching inwards to zoom out
-        and reverse to zoom in. Zooming in can also be accoplished by double-tapping the map view. Zooming
+        and reverse to zoom in. Zooming in can also be accomplished by double-tapping the map view. Zooming
         out can also be accomplished by two-finger tapping the map view.
     type: Boolean
     default: true
@@ -1173,6 +1230,7 @@ properties:
     since: "5.0.2"
     platforms: [android]
 
+
 ---
 name: MapLocationTypeV2
 summary: |
@@ -1259,6 +1317,7 @@ properties:
     summary: Destination camera distance in meters.
     type: Number
   - name: animated
+    summary: Whether to animate the operation.
     type: Boolean
     default: true
     optional: true
@@ -1268,10 +1327,12 @@ properties:
     default: 240
     optional: true
   - name: minimumDistance
+    summary: Minimum camera distance in meters.
     type: Number
     default: 40
     optional: true
   - name: maximumDistance
+    summary: Maximum camera distance in meters.
     type: Number
     default: 40000000
     optional: true
@@ -1285,7 +1346,7 @@ since: "6.3.0"
 properties:
   - name: memberAnnotations
     summary: |
-      Array of Modules.Map.Annotation, which is recieved in event 'clusteringstarted' as
+      Array of Modules.Map.Annotation, which is received in event 'clusteringstarted' as
       memberAnnotations.
     type: Array<Modules.Map.Annotation>
 

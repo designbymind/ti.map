@@ -1603,13 +1603,13 @@ CLLocationCoordinate2D userNewLocation;
     title = [NSNull null];
 
   NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
-          viewProxy, @"annotation",
-      ourProxy, @"map",
-      title, @"title",
-      [NSNumber numberWithInteger:[pinview tag]], @"index",
-      @(newState), @"newState",
-      @(oldState), @"oldState",
-      nil];
+                                          viewProxy, @"annotation",
+                                      ourProxy, @"map",
+                                      title, @"title",
+                                      [NSNumber numberWithInteger:[pinview tag]], @"index",
+                                      @(newState), @"newState",
+                                      @(oldState), @"oldState",
+                                      nil];
 
   if (parentWants)
     [ourProxy fireEvent:@"pinchangedragstate" withObject:event];
@@ -1671,19 +1671,6 @@ CLLocationCoordinate2D userNewLocation;
 }
 #endif
 
-#if IS_SDK_IOS_16
-- (void)mapView:(MKMapView *)mapView didDeselectAnnotation:(id<MKAnnotation>)annotation
-{
-  if (![TiUtils isIOSVersionOrGreater:@"16.0"]) {
-    return;
-  }
-
-  if ([annotation isKindOfClass:MKMapFeatureAnnotation.class]) {
-    [self.proxy fireEvent:@"poideselect"];
-  }
-}
-#endif
-
 - (void)fireUserLocationAnnotationEvent:(NSString *)eventName annotation:(MKUserLocation *)userLocation
 {
   TiProxy *mapProxy = self.proxy;
@@ -1713,7 +1700,7 @@ CLLocationCoordinate2D userNewLocation;
 
     selectedAnnotation = [ann retain];
 
-    // If canShowCallout == YES we will try to find calloutView to hadleTap on callout
+    // If canShowCallout == YES we will try to find calloutView to handle tap on callout
     if ([ann canShowCallout]) {
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
         [self findCalloutView:ann];
@@ -1736,6 +1723,19 @@ CLLocationCoordinate2D userNewLocation;
     }
   }
 }
+
+#if IS_SDK_IOS_16
+- (void)mapView:(MKMapView *)mapView didDeselectAnnotation:(id<MKAnnotation>)annotation
+{
+  if (![TiUtils isIOSVersionOrGreater:@"16.0"]) {
+    return;
+  }
+
+  if ([annotation isKindOfClass:MKMapFeatureAnnotation.class]) {
+    [self.proxy fireEvent:@"poideselect"];
+  }
+}
+#endif
 
 - (void)mapView:(MKMapView *)mapView didDeselectAnnotationView:(MKAnnotationView *)view
 {
@@ -1891,7 +1891,7 @@ CLLocationCoordinate2D userNewLocation;
 }
 // mapView:viewForAnnotation: provides the view for each annotation.
 // This method may be called for all or some of the added annotations.
-// For MapKit provided annotations (eg. MKUserLocation) return nil to use the MapKit provided annotatiown view.
+// For MapKit provided annotations (e.g. MKUserLocation) return nil to use the MapKit provided annotation view.
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
 {
   if ([annotation isKindOfClass:[TiMapAnnotationProxy class]]) {
@@ -2007,7 +2007,7 @@ CLLocationCoordinate2D userNewLocation;
     NSNumber *lat = [NSNumber numberWithDouble:coord.latitude];
     NSNumber *lng = [NSNumber numberWithDouble:coord.longitude];
     NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
-            mapProxy, @"map", lat, @"latitude", lng, @"longitude", nil];
+                                            mapProxy, @"map", lat, @"latitude", lng, @"longitude", nil];
     if ([mapProxy _hasListeners:@"longclick"]) {
       [mapProxy fireEvent:@"longclick" withObject:event];
     }
@@ -2022,7 +2022,7 @@ CLLocationCoordinate2D userNewLocation;
   NSNumber *lat = [NSNumber numberWithDouble:clickCoordinate.latitude];
   NSNumber *lng = [NSNumber numberWithDouble:clickCoordinate.longitude];
   NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
-          mapProxy, @"map", lat, @"latitude", lng, @"longitude", nil];
+                                          mapProxy, @"map", lat, @"latitude", lng, @"longitude", nil];
 
   if ([mapProxy _hasListeners:@"mapclick"]) {
     [mapProxy fireEvent:@"mapclick" withObject:event];
@@ -2108,7 +2108,7 @@ CLLocationCoordinate2D userNewLocation;
         // Polyline points are equal, which means line length is zero. Use distance from one of the poly points.
         distanceFromLine = lengthA;
       } else {
-        // Touch point is between polyline's points. Calculte distance with Heron's formula.
+        // Touch point is between polyline's points. Calculate distance with Heron's formula.
         double value = (lengthA + lengthB + lengthC) / 2.0;
         double area = sqrt((value - lengthA) * (value - lengthB) * (value - lengthC) * value);
         distanceFromLine = (area * 2.0) / lengthC;
@@ -2126,12 +2126,12 @@ CLLocationCoordinate2D userNewLocation;
 - (void)fireEvent:(NSString *)event withRegion:(MKCoordinateRegion)_region animated:(BOOL)animated
 {
   NSDictionary *object = [NSDictionary dictionaryWithObjectsAndKeys:
-          event, @"type",
-      [NSNumber numberWithDouble:_region.center.latitude], @"latitude",
-      [NSNumber numberWithDouble:_region.center.longitude], @"longitude",
-      [NSNumber numberWithDouble:_region.span.latitudeDelta], @"latitudeDelta",
-      [NSNumber numberWithDouble:_region.span.longitudeDelta], @"longitudeDelta",
-      NUMBOOL(animated), @"animated", nil];
+                                           event, @"type",
+                                       [NSNumber numberWithDouble:_region.center.latitude], @"latitude",
+                                       [NSNumber numberWithDouble:_region.center.longitude], @"longitude",
+                                       [NSNumber numberWithDouble:_region.span.latitudeDelta], @"latitudeDelta",
+                                       [NSNumber numberWithDouble:_region.span.longitudeDelta], @"longitudeDelta",
+                                       NUMBOOL(animated), @"animated", nil];
 
   [self.proxy fireEvent:event withObject:object];
 }
@@ -2158,8 +2158,8 @@ CLLocationCoordinate2D userNewLocation;
   id clicksource = source ? source : (id)[NSNull null];
 
   NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
-          clicksource, @"clicksource", viewProxy, @"annotation", mapProxy, @"map",
-      title, @"title", NUMINTEGER(indexNumber), @"index", NUMBOOL(deselected), @"deselected", nil];
+                                          clicksource, @"clicksource", viewProxy, @"annotation", mapProxy, @"map",
+                                      title, @"title", NUMINTEGER(indexNumber), @"index", NUMBOOL(deselected), @"deselected", nil];
 
   [self doClickEvent:viewProxy mapProxy:mapProxy event:event];
 }
@@ -2179,7 +2179,7 @@ CLLocationCoordinate2D userNewLocation;
   // In iOS, sometimes the source property is forced to the mapProxy and so we have to send along
   // a more robust message via 'shape' and 'shapeType'.
   NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:sourceType, @"clicksource",
-      mapProxy, @"map", lat, @"latitude", lng, @"longitude", sourceProxy, @"source", sourceProxy, @"shape", sourceType, @"shapeType", nil];
+                                      mapProxy, @"map", lat, @"latitude", lng, @"longitude", sourceProxy, @"source", sourceProxy, @"shape", sourceType, @"shapeType", nil];
 
   [self doClickEvent:sourceProxy mapProxy:mapProxy event:event];
 }

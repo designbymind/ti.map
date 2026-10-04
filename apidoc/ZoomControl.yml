@@ -98,9 +98,11 @@ properties:
     default: 220
     since: "7.4.13"
   - name: trackColor
+    summary: Color of the zoom-control track.
     type: String
     default: white
   - name: thumbColor
+    summary: Color of the zoom-control handle.
     type: String
     default: white
   - name: trackWidth
@@ -116,6 +118,7 @@ properties:
     type: Number
     default: 0
   - name: activeTrackOpacity
+    summary: Track opacity during touch interaction.
     type: Number
     default: 0.45
   - name: thumbOpacity
@@ -123,6 +126,7 @@ properties:
     type: Number
     default: 0
   - name: activeThumbOpacity
+    summary: Handle opacity during touch interaction.
     type: Number
     default: 1
   - name: idleDelay
@@ -130,6 +134,7 @@ properties:
     type: Number
     default: 500
   - name: hapticsEnabled
+    summary: Whether selection haptics are enabled during zoom interaction.
     type: Boolean
     default: true
   - name: hapticInterval
@@ -154,6 +159,7 @@ methods:
     summary: Programmatically moves to a logarithmic zoom progress.
     parameters:
       - name: options
+        summary: Options for this operation; see the parameter type for its supported fields.
         type: ZoomControlProgressOptions
   - name: sync
     summary: Synchronizes the thumb position with the map camera immediately.
@@ -163,28 +169,37 @@ events:
     summary: Fired when a touch interaction begins.
     properties:
       - name: progress
+        summary: Logarithmic zoom progress from 0 at maximum distance to 1 at minimum distance.
         type: Number
       - name: distance
+        summary: Camera distance in meters.
         type: Number
       - name: interactive
+        summary: Whether this zoom change was caused by user interaction.
         type: Boolean
   - name: zoomchange
     summary: Fired as the touch position changes.
     properties:
       - name: progress
+        summary: Logarithmic zoom progress from 0 at maximum distance to 1 at minimum distance.
         type: Number
       - name: distance
+        summary: Camera distance in meters.
         type: Number
       - name: interactive
+        summary: Whether this zoom change was caused by user interaction.
         type: Boolean
   - name: zoomend
     summary: Fired when the touch interaction ends or is cancelled.
     properties:
       - name: progress
+        summary: Logarithmic zoom progress from 0 at maximum distance to 1 at minimum distance.
         type: Number
       - name: distance
+        summary: Camera distance in meters.
         type: Number
       - name: interactive
+        summary: Whether this zoom change was caused by user interaction.
         type: Boolean
 
 ---
@@ -192,8 +207,10 @@ name: ZoomLevelIndicator
 summary: Emoji or text associated with a zoom progress.
 properties:
   - name: progress
+    summary: Logarithmic zoom progress from 0 at maximum distance to 1 at minimum distance.
     type: Number
   - name: title
+    summary: Emoji or text for the zoom-level indicator.
     type: String
 
 ---
@@ -201,12 +218,15 @@ name: ZoomControlProgressOptions
 summary: Options for changing zoom-control progress programmatically.
 properties:
   - name: progress
+    summary: Logarithmic zoom progress from 0 at maximum distance to 1 at minimum distance.
     type: Number
   - name: animated
+    summary: Whether to animate the operation.
     type: Boolean
     default: true
     optional: true
   - name: duration
+    summary: Animation duration in milliseconds.
     type: Number
     default: 240
     optional: true
