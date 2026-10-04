@@ -1,6 +1,7 @@
-# Ti.Map — designbymind fork
+# Ti.Map — DesignByMind fork
 
-This repository is the source of truth for the custom Ti.Map module used by DateMaps.
+This repository is the source of truth for the DesignByMind fork of Ti.Map, a general-purpose
+map module for Titanium applications.
 The iOS module is version **7.5.0** and builds with Titanium SDK **13.4.1.GA** (minimum 13.3.0).
 
 The fork preserves native featured markers, user-location styling, GeoJSON and cutout overlays,
