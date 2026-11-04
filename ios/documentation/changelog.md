@@ -1,3 +1,8 @@
+## 7.6.0
+
+- Add an optional POI category allowlist to resolved iOS local searches.
+- Preserve existing autocomplete, resolved-result identity, and cancellation behavior.
+
 # Change Log
 
 ## 7.5.0

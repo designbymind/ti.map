@@ -33,6 +33,8 @@ exports.run = function (UI, Map) {
 				region: { latitude: 33.6846, longitude: -117.8265, latitudeDelta: 0.2, longitudeDelta: 0.2 },
 				regionPriority: 'required',
 				resultTypes: [Map.SEARCH_RESULT_TYPE_POINT_OF_INTEREST],
+				// Optional allowlist; omit to search all categories.
+				pointOfInterestFilter: ['MKPOICategoryAmusementPark', 'MKPOICategoryBakery', 'MKPOICategoryBrewery', 'MKPOICategoryCafe'],
 				callback: function (response) {
 					if (closed || currentGeneration !== generation) {
 						return;

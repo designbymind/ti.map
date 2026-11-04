@@ -966,6 +966,18 @@ properties:
     type: Array<Number>
     osver: {ios: {min: "13.0"} }
 
+  - name: pointOfInterestFilter
+    summary: Optional category allowlist for resolved local searches.
+    description: |
+        Applies only to `mode: 'resolved'`. Supply MapKit category identifier
+        strings, for example `['MKPOICategoryCafe', 'MKPOICategoryBakery']`.
+        An empty array excludes all categories. Omit this option to preserve
+        MapKit's normal category behavior. Use POINT_OF_INTEREST resultTypes
+        when requesting only places; this filter does not exclude addresses.
+    type: Array<String>
+    osver: {ios: {min: "13.0"} }
+    since: {iphone: "7.6.0", ipad: "7.6.0"}
+
 ---
 name: SearchCancellationOptions
 summary: Identifies the resolved search request to cancel.

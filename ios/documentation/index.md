@@ -92,3 +92,25 @@ Please direct all questions, feedback, and concerns to [info@appcelerator.com](m
 ## License
 
 Copyright(c) 2013 by Appcelerator, Inc. All Rights Reserved. Please see the LICENSE file included in the distribution for further details.
+
+## Resolved-search POI categories (iOS 7.6.0)
+
+Pass an optional `pointOfInterestFilter` array to `search()` in resolved mode:
+
+```javascript
+Map.search('Cafe', {
+    mode: 'resolved',
+    requestId: 'nearby-cafes',
+    region: { latitude: 33.6846, longitude: -117.8265, latitudeDelta: 0.43, longitudeDelta: 0.52 },
+    regionPriority: 'required',
+    resultTypes: [Map.SEARCH_RESULT_TYPE_POINT_OF_INTEREST],
+    pointOfInterestFilter: ['MKPOICategoryAmusementPark', 'MKPOICategoryBakery', 'MKPOICategoryBrewery', 'MKPOICategoryCafe'],
+    callback: function (response) { Ti.API.info(response); }
+});
+```
+
+The array contains native MapKit category identifier strings. Add or remove
+entries to change the allowlist. An empty array excludes all POI categories;
+omitting the option preserves existing search behavior. The filter affects
+resolved searches only. MapKit still interprets the query, and the rectangular
+region is not a circular distance limit; check result distances if needed.

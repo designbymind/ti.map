@@ -463,6 +463,26 @@
     }
   }
 
+  // Optional category allowlist for resolved searches; existing callers remain unfiltered.
+  if (options[@"pointOfInterestFilter"] != nil) {
+    id categoriesValue = options[@"pointOfInterestFilter"];
+    if (![categoriesValue isKindOfClass:[NSArray class]]) {
+      [self throwException:@"Invalid pointOfInterestFilter" subreason:@"Provide an Array of MapKit POI category identifier Strings" location:CODELOCATION];
+      return;
+    }
+    NSMutableArray *categories = [NSMutableArray array];
+    for (id category in (NSArray *)categoriesValue) {
+      if (![category isKindOfClass:[NSString class]] || [(NSString *)category length] == 0) {
+        [self throwException:@"Invalid pointOfInterestFilter category" subreason:@"Each category must be a nonempty MapKit POI category identifier String" location:CODELOCATION];
+        return;
+      }
+      [categories addObject:category];
+    }
+    if (@available(iOS 13.0, *)) {
+      request.pointOfInterestFilter = [[[MKPointOfInterestFilter alloc] initIncludingCategories:categories] autorelease];
+    }
+  }
+
   [self cancelSearch:@[ @{ @"requestId" : requestId } ]];
   if (_resolvedSearches == nil) {
     _resolvedSearches = [[NSMutableDictionary alloc] init];
